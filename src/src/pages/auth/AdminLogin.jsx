@@ -9,7 +9,7 @@ export default function AdminLogin() {
   const [err, setErr] = useState("");
   const navigate = useNavigate();
   const { setUser } = useAuth(); // Make sure your context provides setUser
-
+const api="http://localhost:5000";
  const submit = async (e) => {
     e.preventDefault();
     setErr("");
@@ -20,7 +20,7 @@ export default function AdminLogin() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/auth/login", {
+      const res = await axios.post(`${api}/auth/login`, {
         username,
         password: pwd,
         role: "admin",
