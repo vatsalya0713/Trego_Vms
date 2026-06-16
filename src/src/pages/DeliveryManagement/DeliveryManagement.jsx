@@ -116,7 +116,26 @@ export default function DeliveryManagement() {
     fetchDeliveries();
     fetchStats();
     fetchRiders();
-  }, [fetchDeliveries, fetchStats, fetchRiders]);
+
+    // Set up auto-polling interval every 10 seconds to fetch new deliveries in background
+    const interval = setInterval(() => {
+      const queryParams = new URLSearchParams();
+      if (activeTab !== "all") queryParams.append("status", activeTab);
+      if (startDate) queryParams.append("startDate", startDate);
+      if (endDate) queryParams.append("endDate", endDate);
+      if (search) queryParams.append("search", search);
+
+      axios.get(`${API}/order/vendor/deliveries?${queryParams.toString()}`, authHeaders())
+        .then(res => setOrders(res.data?.data || []))
+        .catch(err => console.error("background fetch error", err));
+      
+      axios.get(`${API}/order/vendor/delivery-stats`, authHeaders())
+        .then(res => setStats(res.data))
+        .catch(err => console.error("background stats error", err));
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [activeTab, startDate, endDate, search, fetchDeliveries, fetchStats, fetchRiders]);
 
   /* ── TOAST ── */
   const showToast = (msg, type = "success") => {

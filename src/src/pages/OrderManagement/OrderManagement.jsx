@@ -98,7 +98,21 @@ export default function OrderManagement() {
     fetchOrders();
     fetchStats();
     fetchRiders();
-  }, [activeTab]);
+
+    // Set up auto-polling interval every 10 seconds to fetch new orders automatically in background
+    const interval = setInterval(() => {
+      const params = activeTab !== "all" ? `?status=${encodeURIComponent(activeTab)}` : "";
+      axios.get(`${API}/order/vendor/orders${params}`, authHeaders())
+        .then(res => setOrders(res.data?.data || []))
+        .catch(err => console.error("background fetch error", err));
+      
+      axios.get(`${API}/order/vendor/stats`, authHeaders())
+        .then(res => setStats(res.data))
+        .catch(err => console.error("background stats error", err));
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [activeTab, fetchOrders, fetchStats, fetchRiders]);
 
   /* ── TOAST ── */
   const showToast = (msg, type = "success") => {
