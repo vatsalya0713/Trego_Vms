@@ -16,7 +16,7 @@ export default function BucketCard({ bucket, isVendor }) {
 
   return (
     <div
-      className="w-40 h-52 border-white/10 bg-white/5 p-3 rounded-lg shadow-md cursor-pointer"
+      className="w-44 h-56 border-white/10 bg-white/5 p-3 rounded-lg shadow-md cursor-pointer"
       onClick={() =>
         navigate(
           isVendor
@@ -25,7 +25,7 @@ export default function BucketCard({ bucket, isVendor }) {
         )
       }
     >
-      <h1 className="text-center text-lg font-semibold mb-1 truncate">
+      <h1 className="text-center text-violet-500 text-lg font-semibold mb-1 truncate">
         {bucket.name}
       </h1>
 
@@ -35,9 +35,10 @@ export default function BucketCard({ bucket, isVendor }) {
         className="h-24 w-full object-cover rounded-md mb-2"
       />
 
-      <p className="text-xs">Medicines: {bucket.number_medicines ?? "—"}</p>
-      <p className="text-xs">Brands: {bucket.capacity ?? "—"}</p>
-      <p className="text-xs">Category: {bucket.category ?? "—"}</p>
+      <p className="text-xs text-[#f72585]">Bucket Capacity: <span className="text-slate-900">{bucket.number_medicines ?? "—"}</span></p>
+      <p className="text-xs text-[#f72585]">Bucket Size: <span className="text-slate-900">{bucket.capacity ?? "—"}</span></p>
+      <p className="text-xs text-[#f72585]">Category: <span className="text-slate-900">{bucket.category ?? "—"}</span></p>
+      <p className="text-xs text-[#f72585]">Category Type: <span className="text-slate-900">{bucket.category_type ?? "—"}</span></p>
     </div>
   );
 }

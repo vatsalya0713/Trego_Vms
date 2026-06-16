@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
-
+const api="http://localhost:5000";
   const handleEmailCheck = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/vendor/forgot-password", { email });
+      const res = await axios.post(`${api}/vendor/forgot-password`, { email });
       alert(res.data.msg);
       navigate("/reset-password", { state: { email } }); // redirect with email
     } catch (err) {

@@ -1,1 +1,23 @@
+# Environment files - NEVER commit secrets
 backend/.env
+backend/.env.*
+src/.env
+src/.env.*
+
+# Node modules - install via npm
+backend/node_modules/
+src/node_modules/
+
+# Build output
+src/dist/
+
+# Uploaded files (local only)
+backend/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

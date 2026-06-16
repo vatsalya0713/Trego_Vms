@@ -14,7 +14,7 @@ export default function VendorDetailReview() {
   const [isEditing, setIsEditing] = useState(false);
 const [formData, setFormData] = useState({ ...data });
 const [editMode, setEditMode] = useState(false);
-
+const api="http://localhost:5000";
 const {
   register,
   getValues,
@@ -25,7 +25,7 @@ const {
     if (!applicant_id) return;
 
     axios
-      .get(`http://localhost:5000/vendor/vendor/application/${applicant_id}`)
+      .get(`${api}/vendor/vendor/application/${applicant_id}`)
       .then((res) => {
         setData(res.data);
           setFormData(res.data); //  copy for editing
@@ -50,7 +50,7 @@ const handleSaveEdit = async () => {
     const token = localStorage.getItem("token");
 
     await axios.put(
-      "http://localhost:5000/vendor/vendor/business/update",
+      `${api}/vendor/vendor/business/update`,
       {
         applicant_id,
         ...getValues()
@@ -67,7 +67,7 @@ const handleSaveEdit = async () => {
 
     // reload updated data
     const res = await axios.get(
-      `http://localhost:5000/vendor/vendor/application/${applicant_id}`,
+      `${api}/vendor/vendor/application/${applicant_id}`,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -89,7 +89,7 @@ const handleSaveEdit = async () => {
   const handleSubmit = async () => {
     try {
       const token=localStorage.getItem("token");
-      await axios.post("http://localhost:5000/vendor/vendor/application/submit", {
+      await axios.post(`${api}/vendor/vendor/application/submit`, {
         applicant_id
       },
     {
@@ -110,8 +110,8 @@ const handleSaveEdit = async () => {
   const canEdit = data.status === "DRAFT" && editable;
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 rounded-xl border border-gray-800 bg-gray-900 p-6">
-      <h1 className="text-2xl font-semibold mb-2">Review Vendor Application</h1>
+    <div className="max-w-4xl mx-auto mt-10 rounded-2xl border border-slate-900 bg-white/5 p-6 shadow-lg shadow-violet-200">
+      <h1 className="text-2xl font-semibold mb-2 text-slate-900">Review Vendor Application</h1>
 
       <StatusBadge status={data.status} />
 
@@ -393,26 +393,26 @@ const handleSaveEdit = async () => {
 function Section({ title, children }) {
   return (
     <div className="mt-6">
-      <h2 className="mb-3 text-lg font-medium text-gray-300">{title}</h2>
+      <h2 className="mb-3 text-[16px] font-semibold uppercase tracking-wide text-[#f72585]">{title}</h2>
       <div className="grid gap-3 sm:grid-cols-2">{children}</div>
     </div>
   );
 }
 
- function ReviewField({ label, value, name, editMode, register }) {
+function ReviewField({ label, value, name, editMode, register }) {
   return (
     <div>
-      <p className="text-xs text-gray-400">{label}</p>
+      <p className="text-xs text-slate-500 mb-1">{label}</p>
 
       {!editMode ? (
-        <p className="rounded-md bg-gray-800 px-3 py-2 text-sm">
+        <p className="rounded-md bg-white/5 border border-slate-900 px-3 py-2 text-sm text-slate-900">
           {value || "-"}
         </p>
       ) : (
         <input
           {...register(name)}
           defaultValue={value}
-          className="w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2 text-sm"
+          className="w-full rounded-md border border-slate-900 bg-white/5 px-3 py-2 text-sm text-slate-900 focus:ring-[#56cfe1] outline-none"
         />
       )}
     </div>

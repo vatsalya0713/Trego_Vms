@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye,Search,HistoryIcon,Wallet,Calendar } from "lucide-react";
+
 const initialShipments = [
   {
     id: 1,
@@ -28,7 +30,9 @@ const initialShipments = [
 export default function ShipmentTable() {
   const navigate = useNavigate();
   const [shipments, setShipments] = useState(initialShipments);
-
+const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const handlePaymentChange = (id, value) => {
     setShipments((prev) =>
         prev.map((item) =>
@@ -54,9 +58,47 @@ export default function ShipmentTable() {
   };
 
   return (
+    <>
+     {/* Filter Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <label className="text-xs font-bold text-slate-500 mb-1">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-xs font-bold text-slate-500 mb-1">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+          
+          <div className="relative w-full md:w-110">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-slate-400" />
+            </div>
+            <input
+              type="text"
+              className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent w-full transition-all"
+              placeholder="Search orders ..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+          <h1 className="text-2xl font-semibold text-[#f72585] md:mt-5 md:mb-5">Out For Delivery</h1>
       <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
         <table className="min-w-full text-sm text-gray-700">
-          <thead className="bg-gray-100 text-xs uppercase text-gray-600">
+          <thead className="bg-violet-500 text-xs uppercase text-white ">
           <tr>
             <th className="px-4 py-3 text-left">S.No</th>
             <th className="px-4 py-3 text-left">Date Time</th>
@@ -66,7 +108,9 @@ export default function ShipmentTable() {
             <th className="px-4 py-3 text-left">Address</th>
             <th className="px-4 py-3 text-left">Contact No</th>
             <th className="px-4 py-3 text-left">Payment Mode</th>
+            <th className="px-4 py-3 text-left">Days Count</th>
             <th className="px-4 py-3 text-left">Status</th>
+            
             <th className="px-4 py-3 text-left">Action</th>
           </tr>
           </thead>
@@ -89,13 +133,16 @@ export default function ShipmentTable() {
                       onChange={(e) =>
                           handlePaymentChange(item.id, e.target.value)
                       }
-                      className="rounded-md border border-gray-300 px-2 py-1 text-sm"
+                      className="rounded-md border border-gray-300 px-6 py-1 text-sm"
                   >
                     <option value="COD">COD</option>
                     <option value="GPay">GPay</option>
                   </select>
                 </td>
-
+                                  {/* Payment Mode Dropdown */}
+                <td className="px-4 py-3">
+                 0
+                </td>
                 {/* Status Badge */}
                 <td className="px-4 py-3">
                 <span
@@ -136,5 +183,6 @@ export default function ShipmentTable() {
           </tbody>
         </table>
       </div>
+      </>
   );
 }

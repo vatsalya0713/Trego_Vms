@@ -4,54 +4,47 @@ import { X } from "lucide-react";
 export default function MedicineFormModal({ onClose, onSubmit }) {
   const boxRef = useRef(null);
   const [saving, setSaving] = useState(false);
-
+  const api = "http://localhost:5000";
   const [form, setForm] = useState({
-    /* -------- MEDICINE TABLE -------- */
+    batch_id: "",
+    batchNumber: "",
     name: "",
-    saltcomposition: "",
-    manufacturer: "",
-    manufactureaddress: "",
-    countryoforigin: "",
-    medicinetype: "",
-    packingtype: "",
+    salt_composition: "",
+    medicine_type: "",
     packing: "",
-    prescriptionrequired: "",
+    packing_type: "",
+    country_of_origin: "",
+    prescription_required: "",
     storage: "",
-    description: "",
 
-    /* -------- BATCH TABLE -------- */
-    batchname: "",
-    bucketid: "",
-    medicineid: "",
-
-    /* -------- PRICE TABLE -------- */
     mrp: "",
-    discount: "",
-    sellingprice: "",
-    offerpercent: "",
-    bought: "",
-    costprice: "",
-    expirydate: "",
     quantity: "",
+    discount: "",
+    cost_price: "",
+    selling_price: "",
+    offer_percent: "",
 
-    /* -------- DISCOUNT OFFER TABLE -------- */
-    discounttoconsumer: "",
-    discounttocompany: "",
-    companydiscount: "",
-    vendordiscount: "",
-    companyoffer: "",
-    vendoroffer: "",
-    validfrom: "",
-    validtill: "",
+    manufacture: "",
+    manufacturer_date: "",
+    manufacturer_address: "",
+    expiry_date: "",
 
-    /* -------- IMAGES -------- */
-    image1: null,
-    image2: null,
-    image3: null,
-    image4: null,
-    image5: null,
+    description: "",
+    introduction: "",
+    how_it_works: "",
+    if_miss: "",
+    common_side_effect: "",
+    use_of: "",
+    safety_advice: "",
+
+    alcohol_interaction: "",
+    driving_interaction: "",
+    kidney_interaction: "",
+    lactation_interaction: "",
+    liver_interaction: "",
+    pregnancy_interaction: "",
+    question_answers: "",
   });
-
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
@@ -101,80 +94,110 @@ export default function MedicineFormModal({ onClose, onSubmit }) {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* ================= MEDICINE INFORMATION ================= */}
           <Section title="Medicine Information">
-            <Field label="Medicine Name" name="name" onChange={handleChange} />
+            <Field
+              label="Medicine Name"
+              name="name"
+              onChange={handleChange}
+              required
+            />
+            <Field 
+            label="Batch Number"
+            name="batchNumber"
+            onChange={handleChange}
+              required
+            />
             <Field
               label="Salt Composition"
-              name="saltcomposition"
+              name="salt_composition"
               onChange={handleChange}
+              required
+            />
+            <Field
+              label="Medicine Type"
+              name="medicine_type"
+              onChange={handleChange}
+              required
             />
 
             <Field
-              label="Manufacturer"
-              name="manufacturer"
+              label="Packing"
+              name="packing"
               onChange={handleChange}
+              required
             />
             <Field
-              label="Manufacturer Address"
-              name="manufactureaddress"
+              label="Packing Type"
+              name="packing_type"
               onChange={handleChange}
+              required
             />
 
             <Field
               label="Country Of Origin"
-              name="countryoforigin"
+              name="country_of_origin"
               onChange={handleChange}
+              required
             />
-            <Field
-              label="Medicine Type"
-              name="medicinetype"
-              onChange={handleChange}
-            />
-
-            <Field label="Packing" name="packing" onChange={handleChange} />
-            <Field
-              label="Packing Type"
-              name="packingtype"
-              onChange={handleChange}
-            />
-
             <Field
               label="Prescription Required"
-              name="prescriptionrequired"
+              name="prescription_required"
               onChange={handleChange}
+              required
             />
-            <Field label="Storage" name="storage" onChange={handleChange} />
-          </Section>
+            <Field label="Storage" name="storage" onChange={handleChange}  required/>
 
-          {/* ================= BATCH INFORMATION ================= */}
-          {/* <Section title="Batch Information">
             <Field
-              label="Batch Name"
-              name="batchname"
+              label="Manufacturer"
+              name="manufacture"
               onChange={handleChange}
+              required
             />
             <Field
-              label="Bucket ID"
-              name="bucketid"
-              type="number"
+              label="Manufacturer Address"
+              name="manufacturer_address"
               onChange={handleChange}
+              required
             />
-          </Section> */}
+            <Field
+              label="Manufacturer Date"
+              name="manufacturer_date"
+              type="date"
+              onChange={handleChange}
+              required
+            />
+
+            <Field
+              label="Expiry Date"
+              name="expiry_date"
+              type="date"
+              onChange={handleChange}
+              required
+            />
+          </Section>
 
           {/* ================= PRICE INFORMATION ================= */}
           <Section title="Price Information">
             <Field
               label="MRP"
               name="mrp"
-              type="number"
+              type="decimal"
               onChange={handleChange}
+              required
             />
             <Field
+              label="Selling Price"
+              name="selling_price"
+              type="number"
+              onChange={handleChange}
+              required
+            />
+
+            <Field
               label="Cost Price"
-              name="costprice"
+              name="cost_price"
               type="number"
               onChange={handleChange}
             />
-
             <Field
               label="Discount"
               name="discount"
@@ -182,29 +205,9 @@ export default function MedicineFormModal({ onClose, onSubmit }) {
               onChange={handleChange}
             />
             <Field
-              label="Selling Price"
-              name="sellingprice"
-              type="number"
-              onChange={handleChange}
-            />
-
-            <Field
               label="Offer Percent"
-              name="offerpercent"
+              name="offer_percent"
               type="number"
-              onChange={handleChange}
-            />
-            <Field
-              label="Bought (0/1)"
-              name="bought"
-              type="number"
-              onChange={handleChange}
-            />
-
-            <Field
-              label="Expiry Date"
-              name="expirydate"
-              type="date"
               onChange={handleChange}
             />
             <Field
@@ -215,68 +218,85 @@ export default function MedicineFormModal({ onClose, onSubmit }) {
             />
           </Section>
 
-          {/* ================= DISCOUNT / OFFER ================= */}
-          <Section title="Discount & Offer Information">
+          {/* ================= Medical Details ================= */}
+          <Section title="Medical Details">
             <Field
-              label="Discount To Consumer"
-              name="discounttoconsumer"
-              type="number"
+              label="Description"
+              name="description"
+              type="textarea"
               onChange={handleChange}
             />
             <Field
-              label="Discount To Company"
-              name="discounttocompany"
-              type="number"
-              onChange={handleChange}
-            />
-
-            <Field
-              label="Company Discount"
-              name="companydiscount"
-              type="number"
+              label="Introduction"
+              name="introduction"
+              type="textarea"
               onChange={handleChange}
             />
             <Field
-              label="Vendor Discount"
-              name="vendordiscount"
-              type="number"
-              onChange={handleChange}
-            />
-
-            <Field
-              label="Company Offer"
-              name="companyoffer"
+              label="How It Works"
+              name="how_it_works"
+              type="textarea"
               onChange={handleChange}
             />
             <Field
-              label="Vendor Offer"
-              name="vendoroffer"
-              onChange={handleChange}
-            />
-
-            <Field
-              label="Valid From"
-              name="validfrom"
-              type="date"
+              label="Miss Dose Info"
+              name="if_miss"
+              type="textarea"
               onChange={handleChange}
             />
             <Field
-              label="Valid Till"
-              name="validtill"
-              type="date"
+              label="Side Effects"
+              name="common_side_effect"
+              type="textarea"
+              onChange={handleChange}
+            />
+            <Field label="Use Of" name="use_of" onChange={handleChange} />
+            <Field
+              label="Safety Advice"
+              name="safety_advice"
+              type="textarea"
               onChange={handleChange}
             />
           </Section>
 
-          {/* ================= IMAGES ================= */}
-          <Section title="Medicine Images">
-            <FileField label="Image 1" name="image1" onChange={handleChange} />
-            <FileField label="Image 2" name="image2" onChange={handleChange} />
-
-            <FileField label="Image 3" name="image3" onChange={handleChange} />
-            <FileField label="Image 4" name="image4" onChange={handleChange} />
-
-            <FileField label="Image 5" name="image5" onChange={handleChange} />
+          {/* ========Interaction======= */}
+          <Section title="Interactions">
+            <Field
+              label="Alcohol Interaction"
+              name="alcohol_interaction"
+              onChange={handleChange}
+            />
+            <Field
+              label="Driving Interaction"
+              name="driving_interaction"
+              onChange={handleChange}
+            />
+            <Field
+              label="Kidney Interaction"
+              name="kidney_interaction"
+              onChange={handleChange}
+            />
+            <Field
+              label="Liver Interaction"
+              name="liver_interaction"
+              onChange={handleChange}
+            />
+            <Field
+              label="Pregnancy Interaction"
+              name="pregnancy_interaction"
+              onChange={handleChange}
+            />
+            <Field
+              label="Lactation Interaction"
+              name="lactation_interaction"
+              onChange={handleChange}
+            />
+            <Field
+              label="Q&A"
+              name="question_answers"
+              type="textarea"
+              onChange={handleChange}
+            />
           </Section>
 
           {/* ================= BUTTONS ================= */}
@@ -299,14 +319,19 @@ export default function MedicineFormModal({ onClose, onSubmit }) {
   );
 }
 
-function Field({ label, name, onChange, type = "text", className = "" }) {
+function Field({ label, name, onChange, type = "text", required = false }) {
   return (
-    <div className={className}>
-      <label className="text-xs text-gray-400 mb-1 block">{label}</label>
+    <div>
+      <label
+        className={`text-xs mb-1 block ${required ? "font-bold text-white" : "text-gray-400"}`}
+      >
+        {label} {required && "*"}
+      </label>
 
       {type === "textarea" ? (
         <textarea
           name={name}
+          required={required}
           onChange={onChange}
           className="w-full h-20 bg-white/5 border border-white/10 rounded-md p-2"
         />
@@ -314,6 +339,7 @@ function Field({ label, name, onChange, type = "text", className = "" }) {
         <input
           type={type}
           name={name}
+          required={required}
           onChange={onChange}
           className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2"
         />

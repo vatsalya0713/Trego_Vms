@@ -213,7 +213,7 @@ function ImageField({ label, name, existing, editMode, onChange }) {
 
       {existing && (
         <img
-          src={`http://localhost:5000/${existing}`}
+          src={existing.startsWith("http") ? existing : `http://localhost:5000/${existing}`}
           alt=""
           className="w-32 h-32 object-cover rounded mt-2 mb-2 border border-green-500"
         />

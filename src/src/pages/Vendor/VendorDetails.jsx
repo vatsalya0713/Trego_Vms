@@ -16,13 +16,15 @@ export default function VendorDetails() {
   const navigate = useNavigate();
   const savedVendorId = localStorage.getItem("currentVendorId");
   const isNew = id === "add" || id === undefined;
+  const api="http://localhost:5000";
+  const token = localStorage.getItem("token");
   useEffect(() => {
     async function fetchVendorData() {
       if (isNew) return;
 
       // If opening detail page without params, load ID from localStorage
       if (!id && savedVendorId) {
-        axios.get(`http://localhost:5000/vendor/list/${savedVendorId}`, {
+        axios.get(`${api}/vendor/list/${savedVendorId}`, {
           headers: { Authorization: `Bearer ${token}` }
         }).then(res => setVendor(res.data))
           .catch(err => console.log("Load vendor detail failed:", err));
@@ -32,7 +34,7 @@ export default function VendorDetails() {
         const token = localStorage.getItem("token");
 
         // 1) fetch user (getVendor now returns single object)
-        const res = await axios.get(`http://localhost:5000/vendor/list/${id}`, {
+        const res = await axios.get(`${api}/vendor/list/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         // backend may return either object or array (defensive)
@@ -42,7 +44,7 @@ export default function VendorDetails() {
         setVendor(userData);
 
         // 2) fetch vendor info (joined)
-        const infoRes = await axios.get(`http://localhost:5000/vendor/info/all`);
+        const infoRes = await axios.get(`${api}/vendor/info/all`);
         const allInfos = infoRes.data || [];
         const found = allInfos.find((r) => String(r.user_id) === String(id));
         setVendorInfo(found || null);
@@ -86,21 +88,21 @@ export default function VendorDetails() {
   const set = (k, v) => setForm((s) => ({ ...s, [k]: v }));
 
   const verifiedChip = form.is_verified ? (
-    <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-xs text-sky-300">
+    <span className="inline-flex items-center gap-1 rounded-full border border-sky-500 bg-sky-100 px-2 py-0.5 text-xs text-sky-700">
       <BadgeCheck size={14} /> Verified
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 rounded-full border border-gray-500/30 bg-gray-500/10 px-2 py-0.5 text-xs text-gray-300">
+    <span className="inline-flex items-center gap-1 rounded-full border border-gray-400 bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
       Pending
     </span>
   );
 
   const activeChip = form.active ? (
-    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300">
+    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500 bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">
       <ShieldCheck size={14} /> Active
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-xs text-red-300">
+    <span className="inline-flex items-center gap-1 rounded-full border border-red-500 bg-red-100 px-2 py-0.5 text-xs text-red-700">
       <Ban size={14} /> Blocked
     </span>
   );
@@ -140,7 +142,7 @@ export default function VendorDetails() {
       //create new vendor
       if (isNew) {
         try {
-          await axios.post("http://localhost:5000/vendor/add", {
+          await axios.post(`${api}/vendor/add`, {
             name: form.name,
             username: form.username,
             password: form.password,
@@ -162,7 +164,7 @@ export default function VendorDetails() {
       const userPayload = { name: form.name, username: form.username };
       if (form.password) userPayload.password = form.password;
 
-      await axios.patch(`http://localhost:5000/vendor/update/${id}`, userPayload, {
+      await axios.patch(`${api}/vendor/update/${id}`, userPayload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -192,12 +194,12 @@ export default function VendorDetails() {
 
       // Try update, if 404 then create
       try {
-        await axios.put(`http://localhost:5000/vendor/info/${id}`, infoPayload, {
+        await axios.put(`${api}/vendor/info/${id}`, infoPayload, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } catch (putErr) {
         if (putErr.response && putErr.response.status === 404) {
-          await axios.post(`http://localhost:5000/vendor/info`, { user_id: id, ...infoPayload }, {
+          await axios.post(`${api}/vendor/info`, { user_id: id, ...infoPayload }, {
             headers: { Authorization: `Bearer ${token}` },
           });
         } else {
@@ -208,14 +210,14 @@ export default function VendorDetails() {
       setMsg("Vendor updated successfully");
 
       // refetch user (server returns single object for getVendor now)
-      const refetchUser = await axios.get(`http://localhost:5000/vendor/list/${id}`, {
+      const refetchUser = await axios.get(`${api}/vendor/list/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const updatedUser = Array.isArray(refetchUser.data) ? refetchUser.data[0] : refetchUser.data;
       setVendor(updatedUser);
 
       // refetch info
-      const infoRes = await axios.get(`http://localhost:5000/vendor/info/all`);
+      const infoRes = await axios.get(`${api}/vendor/info/all`);
       const found = infoRes.data.find((r) => String(r.user_id) === String(id));
       setVendorInfo(found || null);
     } catch (err) {
@@ -230,7 +232,7 @@ export default function VendorDetails() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(`http://localhost:5000/vendor/status/${id}`, {}, {
+      const res = await axios.post(`${api}/vendor/status/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const { newStatus } = res.data;
@@ -238,7 +240,7 @@ export default function VendorDetails() {
       setForm((prev) => ({ ...prev, active: newStatus === "Active" }));
       setMsg(`Vendor status changed to ${newStatus}`);
       // refetch users to keep vendor state consistent
-      const refetchUser = await axios.get(`http://localhost:5000/vendor/list/${id}`, {
+      const refetchUser = await axios.get(`${api}/vendor/list/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const updatedUser = Array.isArray(refetchUser.data) ? refetchUser.data[0] : refetchUser.data;
@@ -254,19 +256,19 @@ export default function VendorDetails() {
   return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <Link to="/vendors" className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white">
+          <Link to="/vendors" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
             <ArrowLeft size={16} /> Back to Vendors
           </Link>
           {!isNew && vendor && (
-            <div className="text-xs text-gray-400">
-              Vendor ID: <span className="text-gray-200">{vendor.id}</span>
+            <div className="text-xs text-slate-500">
+              Vendor ID: <span className="text-slate-900 font-medium">{vendor.id}</span>
             </div>
           )}
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+        <div className="rounded-2xl border border-slate-900 bg-white/5 p-5 shadow-lg shadow-violet-200">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h1 className="text-2xl font-semibold">{isNew ? "Add new Vendor" : form.name}</h1>
+            <h1 className="text-2xl font-semibold text-slate-900">{isNew ? "Add new Vendor" : form.name}</h1>
             <div className="flex flex-wrap items-center gap-2">
               {activeChip}
               {verifiedChip}
@@ -282,7 +284,7 @@ export default function VendorDetails() {
           <form className="space-y-6" onSubmit={handleSave}>
             {/* Business Info */}
             <section>
-              <h2 className="mb-2 text-sm font-semibold text-gray-300">Business Info</h2>
+              <h2 className="mb-4 text-[16px] font-semibold uppercase tracking-wide text-[#f72585]">Business Info</h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <Input label="Name" value={form.name} onChange={(v) => set("name", v)} />
                 <Input label="Category" value={form.category} onChange={(v) => set("category", v)} />
@@ -296,7 +298,7 @@ export default function VendorDetails() {
 
             {/* Compliance & Contact */}
             <section>
-              <h2 className="mb-2 text-sm font-semibold text-gray-300">Compliance & Contact</h2>
+              <h2 className="mb-4 text-[16px] font-semibold uppercase tracking-wide text-[#f72585]">Compliance & Contact</h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <Input label="Drug License No." value={form.druglicense} onChange={(v) => set("druglicense", v)} leftIcon={<FileText size={14} />} />
                 <Input label="GSTIN" value={form.gstin} onChange={(v) => set("gstin", v)} />
@@ -307,7 +309,7 @@ export default function VendorDetails() {
 
             {/* Delivery */}
             <section>
-              <h2 className="mb-2 text-sm font-semibold text-gray-300">Delivery SLA</h2>
+              <h2 className="mb-4 text-[16px] font-semibold uppercase tracking-wide text-[#f72585]">Delivery SLA</h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <Input label="Delivery Time (minutes)" type="number" value={form.delivery_time_minutes} onChange={(v) => set("delivery_time_minutes", v)} />
                 <Input label="Delivery Range (km)" type="number" value={form.delivery_range_km} onChange={(v) => set("delivery_range_km", v)} />
@@ -316,7 +318,7 @@ export default function VendorDetails() {
 
             {/* Discounts / Offers */}
             <section>
-              <h2 className="mb-2 text-sm font-semibold text-gray-300">Discounts & Offers (%)</h2>
+              <h2 className="mb-4 text-[16px] font-semibold uppercase tracking-wide text-[#f72585]">Discounts & Offers (%)</h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <Input label="User Discount" type="number" value={form.user_discount} onChange={(v) => set("user_discount", v)} />
                 <Input label="Company Discount" type="number" value={form.company_discount} onChange={(v) => set("company_discount", v)} />
@@ -331,13 +333,13 @@ export default function VendorDetails() {
 
             {/* Status */}
             <section>
-              <h2 className="mb-2 text-sm font-semibold text-gray-300">Status</h2>
+              <h2 className="mb-4 text-[16px] font-semibold uppercase tracking-wide text-[#f72585]">Status</h2>
               <div className="flex flex-wrap items-center gap-4">
-                <label className="inline-flex items-center gap-2 text-sm">
+                <label className="inline-flex items-center gap-2 text-sm text-slate-900">
                   <input type="checkbox" className="h-4 w-4 accent-emerald-500" checked={form.active} onChange={handleToggleActive} />
                   Active
                 </label>
-                <label className="inline-flex items-center gap-2 text-sm">
+                <label className="inline-flex items-center gap-2 text-sm text-slate-900">
                   <input type="checkbox" className="h-4 w-4 accent-sky-500" checked={form.is_verified} onChange={() => set("is_verified", !form.is_verified)} />
                   Verified
                 </label>
@@ -359,12 +361,12 @@ export default function VendorDetails() {
 function Input({ label, leftIcon, type = "text", value, onChange }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs text-gray-400">{label}</span>
-      <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3">
-        {leftIcon}
+      <span className="mb-1 block text-xs text-slate-500">{label}</span>
+      <div className="flex items-center gap-2 rounded-md border border-slate-900 bg-white/5 px-3">
+        {leftIcon && <span className="text-slate-500">{leftIcon}</span>}
         <input
           type={type}
-          className="w-full bg-transparent py-2 outline-none"
+          className="w-full bg-transparent py-2 outline-none text-slate-900 text-sm"
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />

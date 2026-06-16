@@ -239,6 +239,7 @@ export default function Admins() {
   const [onlyActive, setOnlyActive] = useState(false);
   const [admin, setadmin] = useState([]);
   const loginMap = useLoginMap();
+const api="http://localhost:5000";
 
   if (!user || user.role !== "SUPER_ADMIN") {
     return <p className="text-red-400">Access denied</p>;
@@ -252,7 +253,7 @@ export default function Admins() {
   const fetchAdminData = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/admin/list", {
+      const res = await axios.get(`${api}/admin/list`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setadmin(res.data);
@@ -267,14 +268,14 @@ export default function Admins() {
 
   // For serial + sort by createdAt desc
   const rowsSorted = useMemo(() => {
-    const copy = admins.slice();
+    const copy = admin.slice();
     copy.sort((a, b) => {
-      const ta = a.createdAt ? +new Date(a.createdAt) : 0;
-      const tb = b.createdAt ? +new Date(b.createdAt) : 0;
+      const ta = a.created_at ? +new Date(a.created_at) : 0;
+      const tb = b.created_at ? +new Date(b.created_at) : 0;
       return tb - ta;
     });
     return copy;
-  }, [admins]);
+  }, [admin]);
 
   // Filters
   const rows = useMemo(() => {
@@ -283,8 +284,9 @@ export default function Admins() {
       const okQ =
         !q ||
         (a.name || "").toLowerCase().includes(q) ||
+        (a.username || "").toLowerCase().includes(q) ||
         (a.email || "").toLowerCase().includes(q);
-      const isActive = a.active !== false;
+      const isActive = a.activeStatus === "Active";
       const okA = !onlyActive || isActive;
       return okQ && okA;
     });
@@ -294,7 +296,7 @@ export default function Admins() {
   const handleCreate = async (payload) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post("http://localhost:5000/admin/add", payload, {
+      const res = await axios.post(`${api}/admin/add`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("Admin created successfully");
@@ -311,7 +313,7 @@ export default function Admins() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.patch(
-        `http://localhost:5000/admin/update/${id}`,
+        `${api}/admin/update/${id}`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -331,13 +333,14 @@ export default function Admins() {
       const token = localStorage.getItem("token");
 
       const status = await axios.post(
-        `http://localhost:5000/admin/status/${a.id}`,
+        `${api}/admin/status/${a.id}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
       console.log(status.activeStatus);
+      fetchAdminData();
     } catch (err) {
       console.log(err);
     }
@@ -345,7 +348,7 @@ export default function Admins() {
 
   const handleDelete = async (id) => {
     const token = localStorage.getItem("token");
-    const delData = await axios.delete(`http://localhost:5000/admin/${id}`, {
+    const delData = await axios.delete(`${api}/admin/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setadmin((prev) => prev.filter((item) => item.id !== id));
@@ -354,30 +357,32 @@ export default function Admins() {
   return (
     <div className="space-y-6">
       {/* Header + actions */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between ">
         <h1 className="text-2xl font-semibold">Admins</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-2">
+        <div className="flex flex-wrap items-left gap-3">
+          <div className="flex items-center  min-w-xl gap-2 rounded-md border border-slate-900  px-2">
             <Search size={16} className="text-gray-400" />
             <input
-              className="bg-transparent py-1.5 text-sm outline-none"
+              className="bg-transparent py-1.5 text-sm outline-none text-slate-900 placeholder:text-slate-400"
               placeholder="Search name or email…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-          <label className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm">
-            <input
-              type="checkbox"
-              className="h-4 w-4 accent-emerald-500"
-              checked={onlyActive}
-              onChange={() => setOnlyActive(!onlyActive)}
-            />
-            Only active
-          </label>
+          <button
+            onClick={() => setOnlyActive(!onlyActive)}
+            className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+              onlyActive
+                ? "bg-emerald-500 border-emerald-500 text-white"
+                : "border-slate-900 text-slate-900 hover:bg-slate-50"
+            }`}
+          >
+            {onlyActive ? <CheckCircle2 size={16} /> : <Ban size={16} />}
+            Only Active
+          </button>
           <button
             onClick={() => setOpenAdd(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium hover:bg-indigo-500"
+            className="inline-flex items-center gap-2 rounded-md bg-violet-500 px-3 py-2 text-sm text-[#FFD400] font-medium hover:cursor-pointer hover:bg-violet-500"
           >
             <Plus size={16} /> Add Admin
           </button>
@@ -391,9 +396,9 @@ export default function Admins() {
       )}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
+      <div className="overflow-hidden rounded-xl border border-violet-500 bg-white">
         <table className="min-w-full text-sm">
-          <thead className="bg-white/5">
+          <thead className="bg-violet-500">
             <tr>
               <th className="px-3 py-2 text-left">S.No</th>
               <th className="px-3 py-2 text-left">Name</th>
@@ -406,11 +411,11 @@ export default function Admins() {
             </tr>
           </thead>
           <tbody>
-            {admin.map((a, idx) => {
+            {rows.map((a, idx) => {
               const lastLoginTs = loginMap.get((a.email || "").toLowerCase());
               // const isActive = a.active !== false;
               return (
-                <tr key={a.id} className="border-t border-white/10">
+                <tr key={a.id} className="border-t text-sm border-white/10 text-slate-900">
                   <td className="px-3 py-2">{idx + 1}</td>
                   <td className="px-3 py-2">{a.name}</td>
                   <td className="px-3 py-2">{a.username}</td>
@@ -418,18 +423,18 @@ export default function Admins() {
                   <td className="px-3 py-2">
                     <span className="inline-flex items-center gap-1">
                       <CalendarClock size={14} className="text-gray-400" />{" "}
-                      {fmt(a.createdAt)}
+                      {new Date(a.created_at).toLocaleDateString()}
                     </span>
                   </td>
 
-                  <td className="px-3 py-2">{fmt(lastLoginTs)}</td>
+                  <td className="px-3 py-2">{new Date(lastLoginTs).toLocaleDateString()}</td>
                   <td className="px-3 py-2">
                     {a.activeStatus == "Active" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-sm text-emerald-500">
                         <ShieldCheck size={14} /> Active
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-xs text-red-300">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-sm text-red-500">
                         <Ban size={14} /> Blocked
                       </span>
                     )}
@@ -439,21 +444,21 @@ export default function Admins() {
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => navigate(`/admins/${a.id}`)}
-                        className="rounded-md border border-white/10 px-2 py-1 hover:bg-white/5"
+                        className="rounded-md border border-white/10 px-2 py-1 hover:cursor-pointer hover:bg-green-400"
                         title="View"
                       >
                         <Eye size={16} />
                       </button>
                       <button
                         onClick={() => setEditRow(a)}
-                        className="rounded-md border border-white/10 px-2 py-1 hover:bg-white/5"
+                        className="rounded-md border border-white/10 px-2 py-1 hover:cursor-pointer hover:bg-blue-400"
                         title="Edit"
                       >
                         <Pencil size={16} />
                       </button>
                       <button
                         onClick={() => handleToggleActive(a)}
-                        className="rounded-md border border-white/10 px-2 py-1 hover:bg-white/5"
+                        className="rounded-md border border-white/10 px-2 py-1 hover:cursor-pointer hover:bg-red-400"
                         title={a.activeStatus ? "Block" : "Unblock"}
                       >
                         {a.activeStatus != false ? (
@@ -464,7 +469,7 @@ export default function Admins() {
                       </button>
                       <button
                         onClick={() => handleDelete(a.id)}
-                        className="rounded-md border border-white/10 px-2 py-1 hover:bg-red-500/10"
+                        className="rounded-md border border-white/10 px-2 py-1 hover:cursor-pointer hover:bg-red-400"
                         title="Delete"
                       >
                         <Trash2 size={16} />

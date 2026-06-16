@@ -16,22 +16,19 @@ import { useState } from "react";
 function Logo({ collapsed }) {
   return (
     <Link to="/" className="flex items-center gap-2 select-none">
-      <svg width="28" height="28" viewBox="0 0 48 48">
-        <defs>
-          <linearGradient id="medLogoGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#6366f1" />
-            <stop offset="1" stopColor="#10b981" />
-          </linearGradient>
-        </defs>
-        <rect x="6" y="6" width="36" height="36" rx="10" fill="url(#medLogoGrad)" />
-        <path d="M16 24h16M24 16v16" stroke="white" strokeWidth="3" strokeLinecap="round" />
-      </svg>
+     <div className="w-8 h-8">
+          <img
+            src="./logo.jpeg" 
+            alt="network_issue"
+            className="w-full h-full object-contain rounded-full"
+          />
+        </div>
 
       {!collapsed && (
-        <span className="font-semibold tracking-wide">
-          Traco
-          <span className="bg-gradient-to-r from-indigo-400 to-emerald-400 bg-clip-text text-transparent">
-            Medical
+        <span className="font-bold text-white">
+          Trego
+          <span className=" text-[#ffe863]">
+            Medicine
           </span>
         </span>
       )}
@@ -65,7 +62,7 @@ function NavItem({ to, label, Icon, active, collapsed }) {
       className={`flex items-center gap-3 rounded-md px-3 py-2 mb-1 transition-all duration-200
         ${
           active
-            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/50 font-medium"
+            ? "bg-white text-black shadow-lg shadow-white-900/50 font-medium"
             : "hover:bg-white/5 text-gray-300 hover:text-white"
         }
       `}
@@ -162,7 +159,7 @@ export default function Sidebar({ collapsed, onToggle }) {
 
   return (
     <aside
-      className={`hidden md:flex flex-col bg-gray-900 text-gray-200 border-r border-white/10 transition-all
+      className={`hidden rounded-xl md:flex flex-col bg-violet-500 text-gray-200 border-r border-white/10 transition-all
         ${collapsed ? "w-16" : "w-64"}`}
     >
       {/* Header */}
@@ -217,7 +214,7 @@ export default function Sidebar({ collapsed, onToggle }) {
                         to={c.to}
                         className={`block px-3 py-1.5 text-sm rounded-md transition-all duration-200 ${
                           isActive(c.to)
-                            ? "bg-indigo-600/80 text-white shadow-md shadow-indigo-900/50 font-medium"
+                            ? "bg-white text-black shadow-md shadow-white-900/50 font-medium"
                             : "text-gray-400 hover:bg-white/5 hover:text-gray-200"
                         }`}
                       >
@@ -245,7 +242,7 @@ export default function Sidebar({ collapsed, onToggle }) {
                                 to={s.to}
                                 className={`block px-3 py-1.5 text-sm rounded-md transition-all duration-200 ${
                                   isActive(s.to)
-                                    ? "bg-indigo-600/80 text-white shadow-md shadow-indigo-900/50 font-medium"
+                                    ? "bg-white text-black shadow-md shadow-white-900/50 font-medium"
                                     : "text-gray-500 hover:bg-white/5 hover:text-gray-300"
                                 }`}
                               >

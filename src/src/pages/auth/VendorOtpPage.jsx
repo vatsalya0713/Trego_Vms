@@ -10,7 +10,7 @@ function VendorOtpPage() {
   const [otp, setOtp] = useState("");
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
-
+  const api="http://localhost:5000";
   useEffect(() => {
     if (timer === 0) {
       setCanResend(true);
@@ -28,7 +28,7 @@ function VendorOtpPage() {
   const verifyOTP = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/vendor/verify",
+        `${api}/vendor/verify`,
         { mobileNo, otp }
       );
 
@@ -44,7 +44,7 @@ function VendorOtpPage() {
   const resendOTP = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/vendor/resend-otp",
+        `${api}/vendor/resend-otp`,
         { mobileNo }
       );
 

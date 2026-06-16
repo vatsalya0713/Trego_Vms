@@ -55,14 +55,14 @@ export default function RiderList() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Rider Management</h1>
+      <h1 className="text-2xl font-semibold text-violet-500">Rider Management</h1>
 
       {/* TOP BUTTONS */}
       <div className="flex gap-4">
         <button
           onClick={() => setActiveTab("PENDING_APPROVAL")}
-          className={`px-4 py-2 rounded ${activeTab === "PENDING_APPROVAL"
-              ? "bg-yellow-600"
+          className={`px-4 py-2 rounded cursor-pointer ${activeTab === "PENDING_APPROVAL"
+              ? "bg-yellow-600 "
               : "bg-gray-700 hover:bg-gray-600"
             }`}
         >
@@ -71,7 +71,7 @@ export default function RiderList() {
 
         <button
           onClick={() => setActiveTab("APPROVED")}
-          className={`px-4 py-2 rounded ${activeTab === "APPROVED"
+          className={`px-4 py-2 rounded cursor-pointer ${activeTab === "APPROVED"
               ? "bg-emerald-600"
               : "bg-gray-700 hover:bg-gray-600"
             }`}
@@ -81,14 +81,15 @@ export default function RiderList() {
       </div>
 
       {/* TABLE */}
-      <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/5">
+      <div className="overflow-x-auto rounded-xl border border-slate-900   ">
         <table className="min-w-full text-sm">
-          <thead className="bg-white/10">
+          <thead className="bg-violet-500  text-white">
             <tr>
               <th className="px-4 py-2 text-left">S.No</th>
               <th className="px-4 py-2 text-left">Name</th>
               <th className="px-4 py-2 text-left">Attachment</th>
               <th className="px-4 py-2 text-left">Mobile Number</th>
+              <th className="px-4 py-2 text-left">Email</th>
               <th className="px-4 py-2 text-left">Status</th>
             </tr>
           </thead>
@@ -107,7 +108,7 @@ export default function RiderList() {
               riders.map((rider, index) => (
                 <tr
                   key={rider.user_id}
-                  className="border-t border-white/10"
+                  className="border-t border-white/10 text-slate-900"
                 >
                   <td className="px-4 py-2">{index + 1}</td>
                   <td className="px-4 py-2">{rider.username}</td>
@@ -128,6 +129,7 @@ export default function RiderList() {
                   </td>
 
                   <td className="px-4 py-2">{rider.mobileNo}</td>
+                  <td className="px-4 py-2">{rider.email}</td>
 
                   <td className="px-4 py-2">
                     {activeTab === "PENDING_APPROVAL" ? (

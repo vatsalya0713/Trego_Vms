@@ -9,10 +9,10 @@ function ResetPassword() {
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+const api="http://localhost:5000";
   const handleReset = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/vendor/reset-password", {
+      const res = await axios.post(`${api}/vendor/reset-password`, {
         email, newPassword, confirmPassword
       });
       alert(res.data.msg);
