@@ -17,7 +17,7 @@ const handleChange = (e) => {
 };
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
-
+const api="http://localhost:5000";
  const handleSubmit = async (e) => {
   e.preventDefault();
   setMsg("");
@@ -25,7 +25,7 @@ const handleChange = (e) => {
 
   try {
     const res = await axios.post(
-      "http://localhost:5000/rider/login",  // ✅ Rider login API
+      `${api}/rider/login`,  // ✅ Rider login API
       form
     );
 

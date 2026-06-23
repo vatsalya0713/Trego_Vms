@@ -9,6 +9,7 @@ export default function VendorLogin() {
   const [err, setErr] = useState("");
   const navigate = useNavigate();
   const { setUser } = useAuth();
+  const api="http://localhost:5000";
 
   const submit = async (e) => {
     e.preventDefault();
@@ -21,21 +22,21 @@ export default function VendorLogin() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/vendor/vendorlogin",
+        `${api}/vendor/vendorlogin`,
         {
           username,
-          password: pwd
-        }
+          password: pwd,
+        },
       );
 
       const { token, applicationStatus, applicant_id, user } = res.data;
       if (!token) throw new Error("No token received");
       if (applicant_id) {
-  localStorage.setItem("applicant_id", applicant_id);
-}
+        localStorage.setItem("applicant_id", applicant_id);
+      }
 
       localStorage.setItem("token", token);
-            console.log(token);
+      console.log(token);
 
       if (applicant_id) {
         localStorage.setItem("applicant_id", applicant_id);
@@ -44,24 +45,21 @@ export default function VendorLogin() {
       setUser({
         id: user.id,
         role: "VENDOR",
-        username: user.username
+        username: user.username,
       });
       console.log("LOGIN STATUS ROW:", applicationStatus);
 
       /* 🚦 Redirect based on application status */
       if (
-        applicationStatus === "PENDING_APPROVAL" ||
-        applicationStatus === "SUBMITTED",
-        applicationStatus==="DRAFT"
+        (applicationStatus === "PENDING_APPROVAL" ||
+          applicationStatus === "SUBMITTED" )
       ) {
         navigate("/vendor/review", { replace: true });
-      }else if(applicationStatus=== "APPROVED"){
-        navigate("/dashboard",{replace:true});
-      }
-       else {
+      } else if (applicationStatus === "APPROVED") {
+        navigate("/dashboard", { replace: true });
+      } else {
         navigate("/vendor/business/detail", { replace: true });
       }
-
     } catch (e) {
       console.error("Login error:", e);
       setErr(e.response?.data?.message || "Login failed");

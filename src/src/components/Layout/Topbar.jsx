@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu as MenuIcon, ChevronDown, LogOut, KeyRound, Clock, UserRound } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 function useOutsideClose(ref, onClose) {
   useEffect(() => {
     function onDoc(e) {
@@ -33,7 +33,7 @@ function Avatar({ name, image }) {
   );
 
   return (
-    <div className="relative inline-flex h-9 w-9 items-center justify-center rounded-full overflow-hidden border border-white/10 bg-gray-800">
+    <div className="relative inline-flex h-9 w-9 items-center justify-center rounded-full hover:cursor-pointer overflow-hidden border border-white/10 bg-white">
       {image ? (
         <img
           src={image}
@@ -44,7 +44,7 @@ function Avatar({ name, image }) {
           }}
         />
       ) : (
-        <span className="text-sm font-semibold text-white">
+        <span className="text-md font-bold text-black">
           {initials}
         </span>
       )}
@@ -60,7 +60,7 @@ export default function Topbar({ onToggle, onLogout }) {
   const [showHistory, setShowHistory] = useState(false);
   const menuRef = useRef(null);
   const [vendorProfile, setVendorProfile] = useState(null);
-
+const navigate = useNavigate();
   useOutsideClose(menuRef, () => setOpen(false));
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function Topbar({ onToggle, onLogout }) {
   );
 
   return (
-    <div className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-white/10 bg-gray-900/80 px-3 backdrop-blur md:px-4">
+    <div className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-violet-500 px-3 shadow-lg shadow-violet-200 backdrop-blur md:px-4">
       {/* Left: hamburger only (logo removed) */}
       <div className="flex items-center">
         <button
@@ -107,8 +107,8 @@ export default function Topbar({ onToggle, onLogout }) {
       </div>
 
       {/* Center: welcome */}
-      <div className="hidden text-sm text-gray-300 md:block">
-        {user ? <>Welcome, <span className="font-medium text-white">{user.name}</span>{rolePill}</> : "TracoAdmin"}
+      <div className="hidden text-[18px] text-[#ffe863]  md:block">
+        {user ? <>Welcome, <span className="font-bold ">{user.name}</span>{rolePill}</> : "TracoAdmin"}
       </div>
 
       {/* Right: Profile dropdown */}
@@ -126,17 +126,17 @@ export default function Topbar({ onToggle, onLogout }) {
               image={vendorProfile?.profile_image}
             />
             <span className="hidden pr-1 text-gray-300 md:inline">{user.email}</span>
-            <ChevronDown size={16} className="text-gray-400 transition group-aria-expanded:rotate-180" />
+            <ChevronDown size={16} className="text-gray-400 transition group-aria-expanded:rotate-180 hover:cursor-pointer" />
           </button>
 
           {/* Menu */}
           <div
-            className={`absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-white/10 bg-gray-900/95 shadow-2xl transition-all ${open ? "opacity-100 translate-y-0" : "pointer-events-none -translate-y-1 opacity-0"
+            className={`absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-white/10 bg-white/95   shadow-2xl transition-all ${open ? "opacity-100 translate-y-0" : "pointer-events-none -translate-y-1 opacity-0"
               }`}
             role="menu"
           >
-            <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2 text-sm">
-              <UserRound size={16} className="text-indigo-300" />
+            <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2 text-sm ">
+              <UserRound size={16} className="text-slate-900" />
               <div className="truncate">
                 <div className="font-medium text-white">{user.name}</div>
                 <div className="text-xs text-gray-400">{user.email}</div>
@@ -144,7 +144,7 @@ export default function Topbar({ onToggle, onLogout }) {
             </div>
 
             <button
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-200 hover:bg-white/5"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-900 hover:bg-white/5 hover:cursor-pointer"
               onClick={() => { setOpen(false); setShowPwd(true); }}
             >
               <KeyRound size={16} />
@@ -152,7 +152,7 @@ export default function Topbar({ onToggle, onLogout }) {
             </button>
 
             <button
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-200 hover:bg-white/5"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-900 hover:bg-white/5 hover:cursor-pointer"
               onClick={() => { setOpen(false); setShowHistory(true); }}
             >
               <Clock size={16} />
@@ -160,8 +160,8 @@ export default function Topbar({ onToggle, onLogout }) {
             </button>
 
             <button
-              className="flex w-full items-center gap-2 border-t border-white/10 px-3 py-2 text-left text-sm text-red-300 hover:bg-red-500/10"
-              onClick={onLogout}
+              className="flex w-full items-center gap-2 border-t border-white/10 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-500/10 hover:cursor-pointer"
+              onClick={()=>navigate("/")}
             >
               <LogOut size={16} />
               Logout

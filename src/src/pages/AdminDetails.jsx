@@ -101,7 +101,7 @@ export default function AdminDetails() {
   const [range, setRange] = useState(7); // 7 | 30 | 90
 
   const admin = useMemo(() => admins.find(a => String(a.id) === String(id)), [admins, id]);
-
+const api="http://localhost:5000";
   if (!admin) {
     return (
       <div className="space-y-4">

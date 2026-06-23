@@ -27,7 +27,7 @@ import VendorsRedirect from "./pages/Vendor/VendorRedirect";
 import VendorMedicine from "./pages/Vendor/VendorMedicine";
 import Profile from "./pages/Vendor/VendorProfile";
 import VendorBucketMedicines from "./pages/Vendor/VendorBucketMedicine";
-import OrderManagement from "./pages/OrderManagement/SimpleOrders";
+import OrderManagement from "./pages/OrderManagement/OrderManagement";
 import DeliveryManagement from "./pages/DeliveryManagement/DeliveryManagement";
 import PendingOrders from "./pages/OrderManagement/PendingOrders";
 import NewOrder from "./pages/OrderManagement/NewOrder";
@@ -60,10 +60,11 @@ export default function App() {
   const doLogout = () => { logout(); navigate("/", { replace: true }); };
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen">
+    <div className="
+    text-white min-h-screen">
       {/* Pre-login header (optional) */}
-      {!user && (
-        <div className="border-b border-gray-800 bg-gray-800 px-6 py-3">
+      {/* {!user && (
+        <div className="border-1 border-gray-800 bg-gray-800 px-6 py-3">
           <div className="mx-auto max-w-6xl flex items-center justify-between text-sm">
             <div className="font-semibold">Traco<span className="text-indigo-400">Admin</span></div>
             <div className="flex gap-4">
@@ -75,7 +76,7 @@ export default function App() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       <Routes>
 
@@ -129,9 +130,10 @@ export default function App() {
           <Route path="/vendor/order/new" element={<NewOrder />} />
 
           <Route path="/vendor/delivery/list" element={<DeliveryManagement />} />
-          <Route path="/vendor/order/outfordelivery" element={<OutForDelivery />} />
-          <Route path="/vendor/order/assign" element={<Assign />} />
-          <Route path="/vendor/delivery/cancelled" element={<CancelledOrder />} />
+          <Route path="/vendor/order/outfordelivery" element={<DeliveryManagement />} />
+          <Route path="/vendor/order/assign" element={<DeliveryManagement />} />
+          <Route path="/vendor/delivery/delivered" element={<DeliveryManagement />} />
+          <Route path="/vendor/delivery/cancelled" element={<DeliveryManagement />} />
           <Route path="/vendor/order/rider/create" element={<Rider />} />
           <Route path="/vendor/order/rider/list" element={<RiderList/>}/>
           

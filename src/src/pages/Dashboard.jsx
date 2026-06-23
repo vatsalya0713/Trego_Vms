@@ -78,9 +78,9 @@ function pctDelta(newV, oldV) {
 const Trend = ({ value }) => {
   const up = value >= 0;
   const Icon = up ? TrendingUp : TrendingDown;
-  const color = up ? "text-emerald-400" : "text-red-400";
+  const color = up ? "text-slate-900" : "text-slate-500";
   return (
-    <span className={`inline-flex items-center gap-1 text-xs ${color}`}>
+    <span className={`inline-flex items-center gap-1 text-sm text-slate-900 ${color}`}>
       <Icon size={14} />
       {value === Infinity || value === -Infinity ? "∞%" : `${value.toFixed(1)}%`}
     </span>
@@ -203,28 +203,28 @@ export default function Dashboard() {
   );
 
   // UI bits
-  const RangeBtn = ({ d, children }) => (
-    <button
-      onClick={() => setRange(d)}
-      className={`rounded-md px-3 py-1.5 text-sm ${
-        range === d ? "bg-white/10 text-white border border-white/15" : "text-gray-300 hover:bg-white/5"
-      }`}
-    >
-      {children}
-    </button>
-  );
+  // const RangeBtn = ({ d, children }) => (
+  //   <button
+  //     onClick={() => setRange(d)}
+  //     className={`rounded-md px-3 py-1.5 text-[16px] ${
+  //       range === d ? "bg-white/10 text-slate-900 border border-white/15" : "text-slate-900 hover:bg-white/5"
+  //     }`}
+  //   >
+  //     {children}
+  //   </button>
+  // );
 
   const StatCard = ({ icon: Icon, label, value, sub, trend }) => (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
+    <div className="rounded-2xl  font-sans border-1 border-slate-900 bg-white/5 p-4 shadow-lg shadow-violet-200">
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-400">{label}</div>
-        <div className="rounded-lg bg-white/10 p-2"><Icon size={18} /></div>
+        <div className="text-[16px] uppercase text-[#f72585]">{label}</div>
+        <div className="rounded-lg bg-[#56cfe1] p-2"><Icon size={18} /></div>
       </div>
       <div className="mt-2 flex items-end gap-2">
-        <div className="text-2xl font-semibold">{value}</div>
+        <div className="text-2xl font-semibold text-slate-900">{value}</div>
         {typeof trend === "number" ? <Trend value={trend} /> : null}
       </div>
-      {sub ? <div className="mt-1 text-xs text-gray-400">{sub}</div> : null}
+      {sub ? <div className="mt-1 text-sm text-slate-900">{sub}</div> : null}
     </div>
   );
 
@@ -237,16 +237,16 @@ export default function Dashboard() {
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
          
-          <p className="text-gray-300">
-            Welcome {user?.name} <span className="text-gray-500">({user?.role})</span>
+          <p className="text-slate-900 ">
+            Welcome {user?.name} <span className="text-slate-900 font-bold">({user?.role})</span>
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">Range:</span>
+        {/* <div className="flex items-center gap-2">
+          <span className="text-[16px] text-slate-900">Range:</span>
           <RangeBtn d={7}>7d</RangeBtn>
           <RangeBtn d={30}>30d</RangeBtn>
           <RangeBtn d={90}>90d</RangeBtn>
-        </div>
+        </div> */}
       </header>
 
       {/* Row 1: Admin/Vendor KPIs */}
@@ -299,8 +299,8 @@ export default function Dashboard() {
             <AreaChart data={ordersSeries} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="gOrders" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.8}/>
-                  <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.06}/>
+                  <stop offset="0%" stopColor="#eb60fa" stopOpacity={0.8}/>
+                  <stop offset="100%" stopColor="#eb60fa" stopOpacity={0.06}/>
                 </linearGradient>
                 <linearGradient id="gDelivered" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#34d399" stopOpacity={0.8}/>

@@ -7,12 +7,14 @@ export default function VendorMedicine() {
   const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem("token");
+  const api="http://localhost:5000";
 
   useEffect(() => {
     const fetchBuckets = async () => {
       try {
+        console.log(token);
         const res = await axios.get(
-          "http://localhost:5000/medicine/vendor/buckets",
+          `${api}/medicine/vendor/buckets`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -25,7 +27,6 @@ export default function VendorMedicine() {
         setLoading(false);
       }
     };
-
     fetchBuckets();
   }, []);
 
@@ -33,7 +34,7 @@ export default function VendorMedicine() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Available Buckets</h1>
+      <h1 className="text-2xl font-semibold text-[#56cfe1]">Available Buckets</h1>
 
       <div className="flex gap-4 flex-wrap">
         {buckets.length === 0 ? (

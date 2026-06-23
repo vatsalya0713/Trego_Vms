@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 
 export default function RiderSignup() {
   const navigate = useNavigate();
-
+const api="http://localhost:5000";
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -28,7 +28,7 @@ export default function RiderSignup() {
     }
 
     const res = await axios.post(
-      "http://localhost:5000/rider/signup",
+      `${api}/rider/signup`,
       form
     );
 
@@ -44,7 +44,7 @@ export default function RiderSignup() {
   // ✅ Verify OTP
   const handleVerifyOtp = async () => {
     try {
-      await axios.post("http://localhost:5000/rider/verify", {
+      await axios.post(`${api}/rider/verify`, {
         mobileNo: form.mobileNo,
         otp,
       });

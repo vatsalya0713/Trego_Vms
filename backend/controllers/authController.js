@@ -39,7 +39,7 @@ const login = (req, res) => {
     return res.status(400).json({ message: "Username and password required" });
   }
 
-  db.query("SELECT * FROM user WHERE username = ?", [username])
+  db.query(`SELECT * FROM user WHERE username = ?`, [username])
     .then(([rows]) => {
       if (rows.length === 0) {
         return res.status(400).json({ message: "Invalid username or password" });

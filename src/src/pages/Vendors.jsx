@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import { Search } from "lucide-react";
 
 const API = "http://localhost:5000/vendor";
 
@@ -17,6 +18,18 @@ const [attachments, setAttachments] = useState(null);
   const [tab, setTab] = useState("SUPER_ADMIN_REVIEW");
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const filteredRows = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    return rows.filter(r => 
+      !q || 
+      (r.username || "").toLowerCase().includes(q) ||
+      (r.email || "").toLowerCase().includes(q) ||
+      (r.applicant_id || "").toString().toLowerCase().includes(q) ||
+      (r.mobile || "").toLowerCase().includes(q)
+    );
+  }, [rows, query]);
 
   /* =========================
      FETCH DATA (SINGLE SOURCE)
@@ -110,33 +123,45 @@ const [attachments, setAttachments] = useState(null);
         Super Admin Panel
       </h1>
 
-      {/* 🔘 TABS */}
-      <div className="flex gap-4">
-        <button
-          onClick={() => setTab("SUPER_ADMIN_REVIEW")}
-          className={`px-4 py-2 rounded ${tab === "SUPER_ADMIN_REVIEW"
-            ? "bg-indigo-600"
-            : "bg-gray-700"
-            }`}
-        >
-          Pending Review
-        </button>
+      {/* 🔘 TABS + SEARCH */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setTab("SUPER_ADMIN_REVIEW")}
+            className={`px-4 py-2 hover:cursor-pointer rounded transition-colors ${tab === "SUPER_ADMIN_REVIEW"
+              ? "bg-violet-500 text-white"
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }`}
+          >
+            Pending Review
+          </button>
 
-        <button
-          onClick={() => setTab("APPROVED")}
-          className={`px-4 py-2 rounded ${tab === "APPROVED"
-            ? "bg-indigo-600"
-            : "bg-gray-700"
-            }`}
-        >
-          Approved
-        </button>
+          <button
+            onClick={() => setTab("APPROVED")}
+            className={`px-4 py-2 hover:cursor-pointer rounded transition-colors ${tab === "APPROVED"
+              ? "bg-violet-500 text-white"
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }`}
+          >
+            Approved
+          </button>
+        </div>
+
+        <div className="flex items-center min-w-[300px] gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 shadow-sm">
+          <Search size={18} className="text-gray-400" />
+          <input
+            className="w-full bg-transparent text-sm outline-none text-slate-900 placeholder:text-slate-400"
+            placeholder="Search vendors…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* 📋 TABLE */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm border border-gray-700">
-          <thead className="bg-gray-800">
+        <table className="w-full text-sm border border-gray-700 bg-white">
+          <thead className="bg-violet-500">
             <tr>
               <th className="p-2">#</th>
               <th>Applicant ID</th>
@@ -150,11 +175,11 @@ const [attachments, setAttachments] = useState(null);
           </thead>
 
           <tbody>
-            {rows.map((r, i) => (
-              <tr key={r.applicant_id} className="border-t border-gray-700">
+            {filteredRows.map((r, i) => (
+              <tr key={r.applicant_id} className="border-t border-gray-700 text-slate-900 hover:cursor-pointer">
                 <td className="p-2">{i + 1}</td>
                 <td className="cursor-pointer">
-                  <button
+                  <button className="hover:cursor-pointer"
                     onClick={() => viewAttachments(r.applicant_id)}>
                     {r.applicant_id}
                   </button></td>                
@@ -168,7 +193,7 @@ const [attachments, setAttachments] = useState(null);
                 </td>
                 <td className="p-2 max-w-xs">
                   {r.admin_feedback ? (
-                    <div className="text-sm text-gray-300 whitespace-pre-wrap max-h-24 overflow-y-auto">
+                    <div className="text-sm text-gray-900 whitespace-pre-wrap max-h-24 overflow-y-auto">
                       {r.admin_feedback}
                     </div>
                   ) : (
@@ -181,7 +206,7 @@ const [attachments, setAttachments] = useState(null);
                   {/*Attachement Table */}
                   <button
                     onClick={() => viewAttachmentImages(r.applicant_id)}
-                    className="px-2 py-1 bg-gray-600 rounded"
+                    className="px-2 py-1  text-[#ffe863] bg-violet-500 rounded hover:cursor-pointer"
                   >
                     Attachments
                   </button>
@@ -203,7 +228,7 @@ const [attachments, setAttachments] = useState(null);
                           onClick={() =>
                             updateStatus(r.applicant_id, "VERIFY")
                           }
-                          className="px-2 py-1 bg-green-600 rounded"
+                          className="px-2 py-1 bg-green-600 rounded hover:cursor-pointer"
                         >
                           Approve
                         </button>
@@ -216,7 +241,7 @@ const [attachments, setAttachments] = useState(null);
                       onClick={() =>
                         updateStatus(r.applicant_id, "TOGGLE_ACTIVE")
                       }
-                      className="px-2 py-1 bg-indigo-600 rounded"
+                      className="px-2 py-1 bg-violet-200 text-[#f72585] rounded"
                     >
                       Activate / Deactivate
                     </button>
@@ -290,8 +315,8 @@ const [attachments, setAttachments] = useState(null);
 
             <div className="flex justify-end">
               <button
-                onClick={() => setShowAttachments(false)}
-                className="px-4 py-2 bg-gray-700 rounded"
+                onClick={() => setShowDetailsModal(false)}
+                className="px-4 py-2 bg-gray-700 rounded hover:cursor-pointer"
               >
                 Close
               </button>
@@ -338,7 +363,7 @@ const [attachments, setAttachments] = useState(null);
       <div className="flex justify-end">
         <button
           onClick={() => setAttachmentImage(false)}
-          className="px-4 py-2 bg-gray-700 rounded"
+          className="px-4 py-2 bg-gray-700 rounded hover:cursor-pointer"
         >
           Close
         </button>
@@ -366,7 +391,7 @@ function AttachmentLink({ label, path }) {
     return <p className="text-sm text-gray-500">{label}: Not uploaded</p>;
   }
 
-  const fileUrl = `http://localhost:5000/${path}`;
+  const fileUrl = path.startsWith("http") ? path : `http://localhost:5000/${path}`;
   const isPdf = path.toLowerCase().endsWith(".pdf");
 
   return (

@@ -1,9 +1,13 @@
 const express = require("express");
 const { addVendor,resendOtp,getAdminVendors,getMyVendorProfile,adminVendorAction,getVendorApplication,submitVendorApplication,updateVendorBusinessDetails,updateVendorPersonalDetails,getVendorInfo,saveVendorPersonalDetails,saveVendorBusinessDetails,updateVendorInfo,getVendors, vendorlogin,getVendor ,updateVendor,updateStatus,deleteVendorInfo, vendorSign,verifyOTP,forgotPassword,resetPassword} = require("../controllers/vendorController");
+const orderController = require("../controllers/orderController");
 const { protect, isSuperAdminorAdmin } = require("../middleware/authMiddleware");
 const authVendor = require("../middleware/authVendor");
 const router = express.Router();
-const uploadVendorDocs = require("../middleware/vendorDocumentUpload");
+const uploadVendorDocs = require("../Services/cloudinary.js");
+
+// Orders (alias for OrderManagement pages — same as GET /order)
+// router.get("/orders", authVendor, orderController.getAllOrders);
 
 // vendor login
 router.post('/vendorlogin',vendorlogin);

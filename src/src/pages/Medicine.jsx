@@ -2,9 +2,19 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus, X, User, Mail, CalendarClock, Search,
-  Eye, Pencil, Ban, CheckCircle2, Trash2,
-  ShieldCheck, BadgeCheck
+  Plus,
+  X,
+  User,
+  Mail,
+  CalendarClock,
+  Search,
+  Eye,
+  Pencil,
+  Ban,
+  CheckCircle2,
+  Trash2,
+  ShieldCheck,
+  BadgeCheck,
 } from "lucide-react";
 import axios from "axios";
 
@@ -15,17 +25,16 @@ const fmt = (ts) => {
   if (isNaN(d)) return "—";
   return d.toLocaleString();
 };
-
+const api = "http://localhost:5000";
 
 // ---------------- API ----------------
 async function addBucketAPI(fd) {
   const token = localStorage.getItem("token");
 
-  return axios.post("http://localhost:5000/medicine/admin/bucket", fd, {
+  return axios.post(`${api}/medicine/admin/bucket`, fd, {
     headers: {
       "Content-Type": "multipart/form-data",
       Authorization: `Bearer ${token}`,
-
     },
   });
 }
@@ -42,21 +51,19 @@ function MedicineModel({ onClose, onSubmit }) {
   const [category, setCategory] = useState("pharmacy");
   const [categoryType, setCategoryType] = useState("");
 
-
   return (
     <div className="fixed inset-0 z-[1000] grid place-items-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-gray-900 p-5 shadow-2xl">
-
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white p-5 shadow-2xl">
         {/* HEADER */}
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Add Bucket</h3>
+          <h3 className="text-lg font-semibold text-slate-900">Add Bucket</h3>
           <button onClick={onClose} className="rounded-md p-1 hover:bg-white/5">
             <X size={18} />
           </button>
         </div>
 
         {msg && (
-          <p className="mb-3 rounded-md border border-yellow-500/30 bg-yellow-500/10 p-2 text-sm text-yellow-300">
+          <p className="mb-3 rounded-md border border-yellow-500/30 bg-yellow-500/10 p-2 text-sm text-[#ffe863]">
             {msg}
           </p>
         )}
@@ -85,14 +92,15 @@ function MedicineModel({ onClose, onSubmit }) {
           }}
           className="space-y-3"
         >
-
           {/* Bucket Name */}
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Bucket Name</label>
+            <label className="mb-1 block text-sm text-violet-500">
+              Bucket Name
+            </label>
             <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3">
-              <User size={16} className="text-gray-400" />
+              <User size={20} className="text-[#56cfe1]" />
               <input
-                className="w-full bg-transparent py-2 outline-none"
+                className="w-full py-1 text-slate-900 px-5  border-1 border-slate-900 rounded-lg"
                 placeholder="Small EP, Medium EP, Large EP"
                 value={bucketName}
                 onChange={(e) => setBucketName(e.target.value)}
@@ -102,39 +110,57 @@ function MedicineModel({ onClose, onSubmit }) {
 
           {/* Capacity */}
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Capacity</label>
+            <label className="mb-1 block text-sm text-violet-500">Size</label>
             <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3">
-              <User size={16} className="text-gray-400" />
-              <input
-                className="w-full bg-transparent py-2 outline-none"
-                placeholder="Small, Medium, Large"
+              <User size={20} className="text-[#56cfe1]" />
+              <select
+                className="w-full py-1 text-slate-900 px-5 border-1 border-slate-900 rounded-lg hover:cursor-pointer"
                 value={capacity}
-                onChange={(e) => setCapacity(e.target.value)}
-              />
+                onChange={(e) => {
+                  const capacity=e.target.value;
+                  setCapacity(capacity);
+                  if (capacity == "small") {
+                    setMedicines(500);
+                  } else if (capacity == "medium") {
+                    setMedicines(1000);
+                  } else if (capacity == "large") {
+                    setMedicines(100000);
+                  }
+                }}
+                required
+              >
+                <option value="">Select Type</option>
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+              </select>
             </div>
           </div>
 
           {/* Medicines */}
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Number of Medicines</label>
+            <label className="mb-1 block text-sm text-violet-500">
+              Capacity
+            </label>
             <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3">
-              <User size={16} className="text-gray-400" />
+              <User size={20} className="text-[#56cfe1]" />
               <input
-                className="w-full bg-transparent py-2 outline-none"
-                placeholder="50, 100, 150..."
+                className="w-full py-1 text-slate-900 px-5  border-1 border-slate-900 rounded-lg"
+                placeholder="500, 1000, 1500..."
                 value={medicines}
-                onChange={(e) => setMedicines(e.target.value)}
               />
             </div>
           </div>
 
           {/* Brand */}
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Brand Name</label>
+            <label className="mb-1 block text-sm text-violet-500">
+              Brand Name
+            </label>
             <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3">
-              <Mail size={16} className="text-gray-400" />
+              <Mail size={20} className="text-[#56cfe1]" />
               <input
-                className="w-full bg-transparent py-2 outline-none"
+                className="w-full py-1 text-slate-900 px-5  border-1 border-slate-900 rounded-lg"
                 placeholder="Brand Name"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
@@ -144,11 +170,11 @@ function MedicineModel({ onClose, onSubmit }) {
 
           {/* Category */}
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Category</label>
+            <label className="block text-sm text-violet-500">Category</label>
             <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3">
-              <User size={16} className="text-gray-400" />
+              <User size={20} className="text-[#56cfe1]" />
               <select
-                className="w-full bg-transparent py-2 outline-none text-gray-300"
+                className="w-full py-1 text-slate-900 px-5  border-1 border-slate-900 rounded-lg"
                 value={category}
                 disabled
               >
@@ -159,11 +185,11 @@ function MedicineModel({ onClose, onSubmit }) {
 
           {/* Category Type */}
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Type</label>
+            <label className="mb-1 block text-sm text-violet-500">Type</label>
             <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3">
-              <User size={16} className="text-gray-400" />
+              <User size={20} className="text-[#56cfe1]" />
               <select
-                className="w-full bg-transparent py-2 outline-none text-gray-300"
+                className="w-full py-1 text-slate-900 px-5 border-1 border-slate-900 rounded-lg"
                 value={categoryType}
                 onChange={(e) => setCategoryType(e.target.value)}
                 required
@@ -178,12 +204,12 @@ function MedicineModel({ onClose, onSubmit }) {
 
           {/* Updated On */}
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Updated On</label>
+            <label className="block text-sm text-violet-500">Updated On</label>
             <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3">
-              <User size={16} className="text-gray-400" />
+              <User size={20} className="text-[#56cfe1]" />
               <input
                 type="date"
-                className="w-full bg-transparent py-2 outline-none"
+                className="w-full py-1 text-slate-900 px-5 rounded-lg"
                 value={updatedOn}
                 onChange={(e) => setUpdatedOn(e.target.value)}
               />
@@ -192,42 +218,42 @@ function MedicineModel({ onClose, onSubmit }) {
 
           {/* Upload Photo */}
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Upload Photo</label>
+            <label className="mb-1 block text-sm text-violet-500">
+              Upload Photo
+            </label>
             <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3">
-              <User size={16} className="text-gray-400" />
+              <User size={20} className="text-[#56cfe1]" />
               <input
                 type="file"
                 accept="image/*"
-                className="w-full bg-transparent py-2 outline-none"
+                className="w-full text-slate-900 "
                 onChange={(e) => setPhoto(e.target.files[0])}
               />
             </div>
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-1 ">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md px-3 py-2 text-sm hover:bg-white/5"
+              className="rounded-md border border-red-500 hover:cursor-pointer text-red-500 px-3 py-2 text-sm hover:bg-red-500 hover:text-white"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="rounded-md bg-emerald-600 px-3 py-2 text-sm hover:bg-emerald-500"
+              className="rounded-md border border-emerald-500 hover:cursor-pointer text-emerald-500 px-3 py-2 text-sm hover:bg-emerald-600 hover:text-white"
             >
               Add Bucket
             </button>
           </div>
-
         </form>
       </div>
     </div>
   );
 }
-
 
 /* ------------ Page ------------- */
 export default function Medicine() {
@@ -242,15 +268,32 @@ export default function Medicine() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [query, setQuery] = useState("");
+  const api = "http://localhost:5000";
+
+  const filteredBuckets = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    return buckets.filter(
+      (b) =>
+        !q ||
+        (b.name || "").toLowerCase().includes(q) ||
+        (b.category || "").toLowerCase().includes(q) ||
+        (b.category_type || "").toLowerCase().includes(q) ||
+        (b.created_by || "").toLowerCase().includes(q),
+    );
+  }, [buckets, query]);
+
   const fetchBuckets = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.get("http://localhost:5000/medicine/admin/bucket");
+      const res = await axios.get(`${api}/medicine/admin/bucket`);
       setBuckets(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error fetching buckets:", err);
-      setError(err?.response?.data?.message || err.message || "Failed to load buckets");
+      setError(
+        err?.response?.data?.message || err.message || "Failed to load buckets",
+      );
     } finally {
       setLoading(false);
     }
@@ -270,19 +313,25 @@ export default function Medicine() {
       console.error(err);
       setError("Failed to create bucket");
     }
-
-  
   };
-
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Medicine Cart</h1>
         <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center min-w-xl gap-2 rounded-md border border-slate-900 px-2">
+            <Search size={16} className="text-gray-400" />
+            <input
+              className="bg-transparent py-1.5 text-sm outline-none text-slate-900 placeholder:text-slate-400"
+              placeholder="Search buckets…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
           <button
             onClick={() => setOpenAdd(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium hover:bg-emerald-500"
+            className="inline-flex items-center gap-2 rounded-md bg-violet-500 px-3 py-2 text-[#ffe863] font-medium hover:cursor-pointer"
           >
             <Plus size={16} /> Create New Bucket
           </button>
@@ -301,12 +350,12 @@ export default function Medicine() {
         <div className="text-sm text-red-400">Error: {error}</div>
       ) : (
         <div className="flex gap-4 flex-wrap">
-
-          {buckets.map((b) => {
+          {filteredBuckets.map((b) => {
             let images = [];
             try {
               if (Array.isArray(b.image)) images = b.image;
-              else if (typeof b.image === "string" && b.image.trim()) images = JSON.parse(b.image);
+              else if (typeof b.image === "string" && b.image.trim())
+                images = JSON.parse(b.image);
             } catch (e) {
               if (b.image) images = [b.image];
             }
@@ -315,16 +364,18 @@ export default function Medicine() {
             return (
               <div
                 key={b.id ?? b.name}
-                className="w-46 h-58 border-white/10 bg-white/5 p-3 rounded-lg shadow-md"
+                className="w-46 h-58 border-black cursor-pointer bg-violet-500/5 p-3 rounded-lg shadow-lg"
                 onClick={() =>
                   navigate(
                     user?.role === "VENDOR"
                       ? `/vendor/medicine/${b.id}`
-                      : `/medicine/${b.id}`
+                      : `/medicine/${b.id}`,
                   )
                 }
               >
-                <h1 className="text-center text-lg font-semibold mb-1 truncate">{b.name}</h1>
+                <h1 className="text-center text-violet-500 text-lg font-semibold mb-1 truncate">
+                  {b.name}
+                </h1>
 
                 <img
                   src={imgSrc}
@@ -332,24 +383,30 @@ export default function Medicine() {
                   className="h-24 w-full object-cover rounded-md mb-2"
                 />
 
-                <p className="text-xs">Bucket Capacity: {b.number_medicines ?? "—"}</p>
-                <p className="text-xs">Size: {b.capacity ?? "—"}</p>
-                <p className="text-xs">Category: {b.category ?? "—"}</p>
-                <p className="text-xs">Category Type: {b.category_type ?? "—"}</p>
-                <p className="text-xs">No Of Medicines: {b.total_medicines ?? "—"}</p>
+                <p className="text-xs text-[#f72585]">
+                  Bucket Capacity: <span className="text-slate-900">{b.number_medicines ?? "—"}</span>
+                </p>
+                <p className="text-xs text-[#f72585]">
+                 Bucket Size: <span className="text-slate-900">{b.capacity ?? "—"}</span>
+                </p>
+                <p className="text-xs text-[#f72585]">
+                  Category: <span className="text-slate-900">{b.category ?? "—"}</span>
+                </p>
+                <p className="text-xs text-[#f72585]">
+                  Category Type: <span className="text-slate-900">{b.category_type ?? "—"}</span>
+                </p>
+                <p className="text-xs text-[#f72585]">
+                  Available Medicines: <span className="text-slate-900">{b.total_medicines || "0"}</span>
+                </p>
               </div>
-
             );
           })}
-
           <div className="w-35 h-35 p-12 mt-9 border-white/10 bg-white/5 flex items-center justify-center rounded-md">
-
-            <button
-              onClick={() => setOpenAdd(true)}
-            >
+            <button onClick={() => setOpenAdd(true)}>
               <Plus size={120} />
             </button>
-          </div>          </div>
+          </div>{" "}
+        </div>
       )}
 
       {/* Modals */}
@@ -375,5 +432,3 @@ export default function Medicine() {
     </div>
   );
 }
-
-

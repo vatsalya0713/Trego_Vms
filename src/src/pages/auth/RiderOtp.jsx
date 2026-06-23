@@ -10,13 +10,13 @@ export default function RiderOtp() {
   const [loading, setLoading] = useState(false);
 
   const mobileNo = localStorage.getItem("riderMobile");
-
+const api="http://localhost:5000";
   const handleVerify = async () => {
     setMsg("");
     setLoading(true);
 
     try {
-      await axios.post("http://localhost:5000/rider/verify", {
+      await axios.post(`${api}/rider/verify`, {
         mobileNo,
         otp
       });

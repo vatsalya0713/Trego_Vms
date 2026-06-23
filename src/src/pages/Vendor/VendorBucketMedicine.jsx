@@ -14,8 +14,8 @@ import {
 // import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import AddMedicineFromDBModal from "../AddMedicineFromDBModal";
-
+import AddMedicineFromDBModal from "../AddMedicineFromDBModal.jsx";
+import BatchModal from "../../../resuable/BatchModal.jsx";
 /* ------------ Modal Helper ------------- */
 function useOutsideClose(ref, onClose) {
   useEffect(() => {
@@ -26,11 +26,11 @@ function useOutsideClose(ref, onClose) {
     function onEsc(e) {
       if (e.key === "Escape") onClose?.();
     }
-    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("click", onDoc);
     document.addEventListener("keydown", onEsc);
 
     return () => {
-      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("click", onDoc);
       document.removeEventListener("keydown", onEsc);
     };
   }, [ref, onClose]);
@@ -45,47 +45,107 @@ function MedicineModal({ mode = "add", initial = {}, onClose, onSubmit }) {
   const [form, setForm] = useState({
     name: initial.name || "",
     salt_composition: initial.salt_composition || "",
-    manufacturers: initial.manufacturers || "",
     medicine_type: initial.medicine_type || "",
-    packaging: initial.packaging || "",
-    packaging_typ: initial.packaging_typ || "",
-    mrp: initial.mrp || "",
-    cost_price: initial.cost_price || "",
-    discount_percent: initial.discount_percent || "",
-    selling_price: initial.selling_price || "",
-    offers_percent: initial.offers_percent || "",
+    packing_type: initial.packing_type || "",
+    country_of_origin: initial.country_of_origin || "",
     prescription_required: initial.prescription_required || 0,
     storage: initial.storage || "",
-    country_of_origin: initial.country_of_origin || "",
-    manufacture_address: initial.manufacture_address || "",
-    best_price: initial.best_price || "",
-    brought: initial.brought || "",
+    manufacture: initial.manufacture || "",
+    batchNumber: initial.batchNumber || "",
+    // PRICE TABLE
+    mrp: initial.mrp || "",
+    cost_price: initial.cost_price || "",
+    selling_price: initial.selling_price || "",
+    discount: initial.discount || "",
+    offer_percent: initial.offer_percent || "",
+
+    // STOCK
+    quantity: initial.quantity || "",
+    expiry_date: initial.expiry_date || "",
+    manufacturer_date: initial.manufacturer_date || "",
+
+    // INFO TABLE
+    description: initial.description || "",
+    alcohol_interaction: initial.alcohol_interaction || "",
+    common_side_effect: initial.common_side_effect || "",
+    driving_interaction: initial.driving_interaction || "",
+    how_it_works: initial.how_it_works || "",
+    if_miss_dose: initial.if_miss_dose || "",
+    introduction: initial.introduction || "",
+    kidney_interaction: initial.kidney_interaction || "",
+    liver_interaction: initial.liver_interaction || "",
+    lactation_interaction: initial.lactation_interaction || "",
+    pregnancy_interaction: initial.pregnancy_interaction || "",
+    question_answers: initial.question_answers || "",
+    safety_advice: initial.safety_advice || "",
+    use_of: initial.use_of || "",
+    packing: initial.packing || "",
   });
 
-  const [imageFiles, setImageFiles] = useState([]);
-  const [preview, setPreview] = useState(initial.image ? [initial.image] : []);
+  const [imageFiles, setImageFiles] = useState({
+    front: null,
+    back: null,
+    top: null,
+    view: null,
+    expiry: null,
+  });
+
+  const [preview, setPreview] = useState({
+    front: null,
+    back: null,
+    top: null,
+    view: null,
+    expiry: null,
+  });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleImage = (e) => {
-    const files = Array.from(e.target.files);
-    setImageFiles(files);
+  const handleSingleImage = (e, type) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    setPreview(files.map((file) => URL.createObjectURL(file)));
+    setImageFiles((prev) => ({
+      ...prev,
+      [type]: file,
+    }));
+
+    setPreview((prev) => ({
+      ...prev,
+      [type]: URL.createObjectURL(file),
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!form.name || !form.salt_composition || !form.mrp) {
+      alert("Name, Salt Composition and MRP are required");
+      return;
+    }
+
+    if (
+      !imageFiles.front ||
+      !imageFiles.back ||
+      !imageFiles.top ||
+      !imageFiles.view ||
+      !imageFiles.expiry
+    ) {
+      alert("All 5 images are required");
+      return;
+    }
+
     const fd = new FormData();
+
     for (const key in form) {
       fd.append(key, form[key]);
     }
 
-    imageFiles.forEach((file) => {
-      fd.append("images", file);
+    Object.entries(imageFiles).forEach(([key, file]) => {
+      if (file) {
+        fd.append(key, file);
+      }
     });
 
     await onSubmit(fd);
@@ -93,190 +153,454 @@ function MedicineModal({ mode = "add", initial = {}, onClose, onSubmit }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] grid place-items-center bg-black/50 p-4 overflow-auto">
+    <div className="fixed inset-0 z-[1000] grid place-items-center  p-4 overflow-auto">
       <div
         ref={boxRef}
-        className="w-full max-w-2xl rounded-2xl border border-white/10 bg-gray-900 p-6 shadow-2xl"
+        className="w-full max-w-2xl rounded-2xl border border-slate-900 bg-white p-6 shadow-2xl"
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-xl font-semibold">
+          <h3 className="text-xl  text-[#f72585]">
             {isEdit ? "Edit Medicine" : "Create Medicine"}
           </h3>
-          <button onClick={onClose} className="rounded-md p-1 hover:bg-white/5">
-            <X size={18} />
+          <button
+            onClick={onClose}
+            className="rounded-md p-1 hover:bg-white/5 hover:cursor-pointer"
+          >
+            <X size={22} color="black" />
           </button>
         </div>
 
         {/* FORM START */}
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-900"
         >
-          <Input
-            label="Name"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-          />
-          <Input
-            label="Salt Composition"
-            name="salt_composition"
-            value={form.salt_composition}
-            onChange={handleChange}
-          />
-
-          <Input
-            label="Manufacturer"
-            name="manufacturers"
-            value={form.manufacturers}
-            onChange={handleChange}
-          />
-          <Input
-            label="Medicine Type"
-            name="medicine_type"
-            value={form.medicine_type}
-            onChange={handleChange}
-          />
-
-          <Input
-            label="Packaging"
-            name="packaging"
-            value={form.packaging}
-            onChange={handleChange}
-          />
-          <Input
-            label="Packaging Type"
-            name="packaging_typ"
-            value={form.packaging_typ}
-            onChange={handleChange}
-          />
-
-          <Input
-            type="number"
-            label="MRP"
-            name="mrp"
-            value={form.mrp}
-            onChange={handleChange}
-          />
-          <Input
-            type="number"
-            label="Cost Price"
-            name="cost_price"
-            value={form.cost_price}
-            onChange={handleChange}
-          />
-
-          <Input
-            type="number"
-            label="Discount %"
-            name="discount_percent"
-            value={form.discount_percent}
-            onChange={handleChange}
-          />
-          <Input
-            type="number"
-            label="Selling Price"
-            name="selling_price"
-            value={form.selling_price}
-            onChange={handleChange}
-          />
-
-          <Input
-            type="number"
-            label="Offers %"
-            name="offers_percent"
-            value={form.offers_percent}
-            onChange={handleChange}
-          />
-          <Input
-            type="number"
-            label="Best Price"
-            name="best_price"
-            value={form.best_price}
-            onChange={handleChange}
-          />
-
-          <Input
-            label="Bought"
-            name="brought"
-            value={form.brought}
-            onChange={handleChange}
-          />
-          <Input
-            label="Country of Origin"
-            name="country_of_origin"
-            value={form.country_of_origin}
-            onChange={handleChange}
-          />
-
-          <Input
-            label="Storage"
-            name="storage"
-            value={form.storage}
-            onChange={handleChange}
-          />
-          <Input
-            label="Manufacture Address"
-            name="manufacture_address"
-            value={form.manufacture_address}
-            onChange={handleChange}
-          />
-
-          {/* Prescription dropdown */}
-          <div className="col-span-2">
-            <label className="mb-1 block text-xs text-gray-400">
-              Prescription Required
-            </label>
-            <select
-              name="prescription_required"
-              value={form.prescription_required}
-              onChange={handleChange}
-              className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 outline-none"
-            >
-              <option value={0}>No</option>
-              <option value={1}>Yes</option>
-            </select>
-          </div>
-
-          {/* Multiple Image Upload */}
-          <div className="col-span-2">
-            <label className="mb-1 block text-xs text-gray-400">
-              Upload Images (max 5)
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImage}
-              className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2"
-            />
-
-            {/* Preview */}
-            {preview.length > 0 && (
-              <div className="flex gap-3 mt-3 flex-wrap">
-                {preview.map((img, idx) => (
-                  <img
-                    key={idx}
-                    src={img}
-                    className="w-24 h-24 rounded-md object-cover border border-white/10"
-                  />
-                ))}
+          {isEdit ? (
+            /* EDIT MODE - Only show Price & Stock */
+            <>
+              <div className="col-span-2 p-3 bg-violet-50 rounded-lg border border-violet-100 mb-2">
+                <p className="font-bold text-violet-700">{form.name}</p>
+                <p className="text-sm text-slate-600">
+                  {form.salt_composition}
+                </p>
               </div>
-            )}
-          </div>
+
+              {/* PRICE */}
+              <Input
+                type="number"
+                label="MRP *"
+                name="mrp"
+                value={form.mrp}
+                onChange={handleChange}
+              />
+              <Input
+                type="number"
+                label="Cost Price"
+                name="cost_price"
+                value={form.cost_price}
+                onChange={handleChange}
+              />
+              <Input
+                type="number"
+                label="Selling Price"
+                name="selling_price"
+                value={form.selling_price}
+                onChange={handleChange}
+              />
+              <Input
+                type="number"
+                label="Discount"
+                name="discount"
+                value={form.discount}
+                onChange={handleChange}
+              />
+              <Input
+                type="number"
+                label="Offer Percent"
+                name="offer_percent"
+                value={form.offer_percent}
+                onChange={handleChange}
+              />
+
+              {/* STOCK */}
+              <Input
+                type="number"
+                label="Quantity"
+                name="quantity"
+                value={form.quantity}
+                onChange={handleChange}
+              />
+              <Input
+                type="date"
+                label="Expiry Date *"
+                name="expiry_date"
+                value={form.expiry_date}
+                onChange={handleChange}
+              />
+              <Input
+                type="date"
+                label="Manufacturer Date *"
+                name="manufacturer_date"
+                value={form.manufacturer_date}
+                onChange={handleChange}
+              />
+            </>
+          ) : (
+            /* ADD MODE - Show All Fields */
+            <>
+              {/* BASIC INFO */}
+              <Input
+                label="Name *"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+              />
+              <Input
+                label="Salt Composition *"
+                name="salt_composition"
+                value={form.salt_composition}
+                onChange={handleChange}
+              />
+
+              <Input
+                label="Medicine Type"
+                name="medicine_type"
+                value={form.medicine_type}
+                onChange={handleChange}
+              />
+              <Input
+                label="Packing Type"
+                name="packing_type"
+                value={form.packing_type}
+                onChange={handleChange}
+              />
+
+              <Input
+                label="Country of Origin"
+                name="country_of_origin"
+                value={form.country_of_origin}
+                onChange={handleChange}
+              />
+              <Input
+                label="Manufacture"
+                name="manufacture"
+                value={form.manufacture}
+                onChange={handleChange}
+              />
+              <Input
+                label="Batch Number"
+                name="batchNumber"
+                value={form.batchNumber}
+                onChange={handleChange}
+              />
+
+              <Input
+                label="Storage"
+                name="storage"
+                value={form.storage}
+                onChange={handleChange}
+              />
+
+              {/* PRICE */}
+              <Input
+                type="number"
+                label="MRP *"
+                name="mrp"
+                value={form.mrp}
+                onChange={handleChange}
+              />
+              <Input
+                type="number"
+                label="Cost Price"
+                name="cost_price"
+                value={form.cost_price}
+                onChange={handleChange}
+              />
+
+              <Input
+                type="number"
+                label="Selling Price"
+                name="selling_price"
+                value={form.selling_price}
+                onChange={handleChange}
+              />
+              <Input
+                type="number"
+                label="Discount"
+                name="discount"
+                value={form.discount}
+                onChange={handleChange}
+              />
+
+              <Input
+                type="number"
+                label="Offer Percent"
+                name="offer_percent"
+                value={form.offer_percent}
+                onChange={handleChange}
+              />
+
+              {/* STOCK */}
+              <Input
+                type="number"
+                label="Quantity"
+                name="quantity"
+                value={form.quantity}
+                onChange={handleChange}
+              />
+              <Input
+                type="date"
+                label="Expiry Date *"
+                name="expiry_date"
+                value={form.expiry_date}
+                onChange={handleChange}
+              />
+
+              <Input
+                type="date"
+                label="Manufacturer Date *"
+                name="manufacturer_date"
+                value={form.manufacturer_date}
+                onChange={handleChange}
+              />
+
+              {/* DESCRIPTION */}
+              <div className="col-span-2">
+                <Input
+                  label="Description"
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* INTERACTIONS */}
+              <Input
+                label="Alcohol Interaction"
+                name="alcohol_interaction"
+                value={form.alcohol_interaction}
+                onChange={handleChange}
+              />
+              <Input
+                label="Driving Interaction"
+                name="driving_interaction"
+                value={form.driving_interaction}
+                onChange={handleChange}
+              />
+
+              <Input
+                label="Kidney Interaction"
+                name="kidney_interaction"
+                value={form.kidney_interaction}
+                onChange={handleChange}
+              />
+              <Input
+                label="Liver Interaction"
+                name="liver_interaction"
+                value={form.liver_interaction}
+                onChange={handleChange}
+              />
+
+              <Input
+                label="Lactation Interaction"
+                name="lactation_interaction"
+                value={form.lactation_interaction}
+                onChange={handleChange}
+              />
+              <Input
+                label="Pregnancy Interaction"
+                name="pregnancy_interaction"
+                value={form.pregnancy_interaction}
+                onChange={handleChange}
+              />
+
+              {/* LONG TEXT FIELDS */}
+              <div className="col-span-2">
+                <Input
+                  label="Common Side Effects"
+                  name="common_side_effect"
+                  value={form.common_side_effect}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Input
+                  label="How It Works"
+                  name="how_it_works"
+                  value={form.how_it_works}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Input
+                  label="Missed Dose Info"
+                  name="if_miss_dose"
+                  value={form.if_miss_dose}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Input
+                  label="Introduction"
+                  name="introduction"
+                  value={form.introduction}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Input
+                  label="Question Answers"
+                  name="question_answers"
+                  value={form.question_answers}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Input
+                  label="Safety Advice"
+                  name="safety_advice"
+                  value={form.safety_advice}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <Input
+                label="Use Of"
+                name="use_of"
+                value={form.use_of}
+                onChange={handleChange}
+              />
+              <Input
+                label="Packing"
+                name="packing"
+                value={form.packing}
+                onChange={handleChange}
+              />
+
+              {/* PRESCRIPTION */}
+              <div className="col-span-2">
+                <label className="mb-1 block text-md text-violet-500">
+                  Prescription Required
+                </label>
+                <select
+                  name="prescription_required"
+                  value={form.prescription_required}
+                  onChange={handleChange}
+                  className="w-full rounded-md border border-slate-900 bg-white/5 px-3 py-2"
+                >
+                  <option value={0}>No</option>
+                  <option value={1}>Yes</option>
+                </select>
+              </div>
+
+              {/* IMAGE */}
+              <div className="col-span-2">
+                <label className=" block text-md text-violet-500">
+                  Upload Images
+                </label>
+
+                <div className="grid grid-cols-2 md:grid-rows-3 gap-4">
+                  {/* FRONT */}
+                  <div>
+                    <p className="text-sm text-slate-900 mb-1">Front</p>
+                    <input
+                      type="file"
+                      onChange={(e) => handleSingleImage(e, "front")}
+                      className="border border-slate-900 rounded-md"
+                    />
+                    {preview.front && (
+                      <img
+                        src={preview.front}
+                        className="w-24 h-24 mt-2 rounded-md object-cover"
+                      />
+                    )}
+                  </div>
+
+                  {/* BACK */}
+                  <div>
+                    <p className="text-sm text-slate-900 mb-1">Back</p>
+                    <input
+                      type="file"
+                      onChange={(e) => handleSingleImage(e, "back")}
+                      className="border border-slate-900 rounded-md"
+                    />
+                    {preview.back && (
+                      <img
+                        src={preview.back}
+                        className="w-24 h-24 mt-2 rounded-md object-cover"
+                      />
+                    )}
+                  </div>
+
+                  {/* TOP */}
+                  <div>
+                    <p className="text-sm text-slate-900 mb-1">Top</p>
+                    <input
+                      type="file"
+                      onChange={(e) => handleSingleImage(e, "top")}
+                      className="border border-slate-900 rounded-md"
+                    />
+                    {preview.top && (
+                      <img
+                        src={preview.top}
+                        className="w-24 h-24 mt-2 rounded-md object-cover"
+                      />
+                    )}
+                  </div>
+
+                  {/* VIEW */}
+                  <div>
+                    <p className="text-sm text-slate-900 mb-1">View</p>
+                    <input
+                      type="file"
+                      onChange={(e) => handleSingleImage(e, "view")}
+                      className="border border-slate-900 rounded-md"
+                    />
+                    {preview.view && (
+                      <img
+                        src={preview.view}
+                        className="w-24 h-24 mt-2 rounded-md object-cover"
+                      />
+                    )}
+                  </div>
+
+                  {/* EXPIRY */}
+                  <div>
+                    <p className="text-sm text-slate-900 mb-1">Expiry</p>
+                    <input
+                      type="file"
+                      onChange={(e) => handleSingleImage(e, "expiry")}
+                      className="border border-slate-900 rounded-md"
+                    />
+                    {preview.expiry && (
+                      <img
+                        src={preview.expiry}
+                        className="w-24 h-24 mt-2 rounded-md object-cover"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </form>
 
         {/* BUTTONS */}
-        <div className="flex justify-end gap-2 pt-4">
+        <div className="flex justify-end gap-2 mt-5 ">
           <button
             onClick={onClose}
-            className="rounded-md px-3 py-2 text-sm hover:bg-white/5"
+            className="rounded-md px-3 py-2 text-sm border-2 border-red-500/50 bg-white text-red-500 hover:text-slate-900 cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="rounded-md bg-emerald-600 px-3 py-2 text-sm hover:bg-emerald-500"
+            className="rounded-md border-2 border-emerald-600 bg-white text-emerald-600 px-3 py-2 text-sm  hover:text-slate-900 cursor-pointer"
           >
             {isEdit ? "Save Changes" : "Add Medicine"}
           </button>
@@ -289,13 +613,15 @@ function MedicineModal({ mode = "add", initial = {}, onClose, onSubmit }) {
 function Input({ label, name, value, onChange, type = "text" }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-gray-400">{label}</label>
+      <label className="mb-1 block text-sm font-semibold text-violet-500">
+        {label}
+      </label>
       <input
         type={type}
         name={name}
         value={value}
         onChange={onChange}
-        className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 outline-none"
+        className="w-full rounded-md border text-slate-900 border-slate-900/40  px-3 py-2 outline-none"
       />
     </div>
   );
@@ -306,76 +632,130 @@ function MedicineViewModal({ data, onClose }) {
   if (!data) return null;
 
   return (
-    <div className="fixed inset-0 z-[3000] grid place-items-center bg-black/50 p-4 overflow-auto">
-      <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-gray-900 p-6 shadow-2xl relative">
+    <div className="fixed inset-0 z-[3000] grid place-items-center  p-4 overflow-auto">
+      <div className="w-full max-w-3xl rounded-2xl border border-slate-900/10 bg-white p-6 shadow-2xl relative">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Medicine Details</h2>
-          <button onClick={onClose} className="rounded-md p-1 hover:bg-white/5">
+          <h2 className="text-xl font-bold text-violet-500">
+            Medicine Details
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-md p-1 bg-red-400 hover:bg-red-500 hover:cursor-pointer"
+          >
             <X size={20} />
           </button>
         </div>
 
         {/* SHOW MULTIPLE IMAGES */}
-        {data.images && data.images.length > 0 && (
-          <div className="flex flex-wrap gap-3 mb-6">
-            {data.images.map((img, idx) => (
-              <img
-                key={idx}
-                src={img}
-                className="w-32 h-32 rounded-xl border border-white/10 object-cover"
-              />
-            ))}
-          </div>
-        )}
+        {(() => {
+          let images = [];
+          if (data.images) {
+            if (Array.isArray(data.images)) {
+              images = data.images;
+            } else {
+              try {
+                images = JSON.parse(data.images);
+              } catch (e) {
+                images = [data.images];
+              }
+            }
+          }
+          if (images.length === 0) {
+            if (data.image_1) images.push(data.image_1);
+            if (data.image_2) images.push(data.image_2);
+            if (data.image_3) images.push(data.image_3);
+            if (data.image_4) images.push(data.image_4);
+            if (data.image_5) images.push(data.image_5);
+          }
+          if (images.length === 0) return null;
+          return (
+            <div className="flex flex-wrap gap-3 mb-6">
+              {images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  className="w-32 h-32 rounded-xl border border-white/10 object-cover"
+                  alt={`medicine-${idx}`}
+                />
+              ))}
+            </div>
+          );
+        })()}
 
         {/* GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* LEFT COLUMN → LABELS */}
           <div className="space-y-3">
             <Info label="ID" />
-            {/* <Info label="Bucket ID" /> */}
             <Info label="Name" />
             <Info label="Salt Composition" />
-            <Info label="Manufacturer" />
+            <Info label="Manufacture" />
             <Info label="Medicine Type" />
-            <Info label="Packaging" />
-            <Info label="Packaging Type" />
+            <Info label="Packing Type" />
             <Info label="MRP" />
             <Info label="Cost Price" />
-            <Info label="Discount %" />
+            <Info label="Discount" />
             <Info label="Selling Price" />
-            <Info label="Offers %" />
+            <Info label="Offer %" />
             <Info label="Prescription Required" />
             <Info label="Storage" />
             <Info label="Country of Origin" />
-            <Info label="Manufacture Address" />
-            <Info label="Best Price" />
-            <Info label="Bought From" />
+            <Info label="Manufacturer Address" />
+            <Info label="Batch Number" />
             <Info label="Created At" />
           </div>
 
           {/* RIGHT COLUMN → VALUES */}
           <div className="space-y-3">
-            <Info value={data.id} />
-            {/* <Info value={data.bucket_id} /> */}
+            <Info value={data.vendor_medicine_id} />
             <Info value={data.name} />
-            <Info value={data.salt_composition?data.salt_composition:"Not Describe"} />
-            <Info value={data.manufacturers?data.manufacturers:"Not Describe"} />
-            <Info value={data.medicine_type?data.medicine_type:"Not Describe"} />
-            <Info value={data.packaging?data.packaging:"Not Describe"} />
-            <Info value={data.packaging_typ?data.packaging_typ:"Not Describe"} />
-            <Info value={data.mrp?`₹${data.mrp}`:"Not Describe"} />
-            <Info value={data.cost_price?`₹${data.cost_price}`:"Not Describe"} />
-            <Info value={data.discount_percent?`${data.discount_percent}%`:"Not Describe"} />
-            <Info value={data.selling_price?`₹${data.selling_price}`:"Not Describe"} />
-            <Info value={data.offers_percent?`${data.offers_percent}%`:"Not Describe"} />
+            <Info
+              value={
+                data.salt_composition ? data.salt_composition : "Not Describe"
+              }
+            />
+            <Info
+              value={data.manufacture ? data.manufacture : "Not Describe"}
+            />
+            <Info
+              value={data.medicine_type ? data.medicine_type : "Not Describe"}
+            />
+            <Info
+              value={data.packing_type ? data.packing_type : "Not Describe"}
+            />
+            <Info value={data.mrp ? `₹${data.mrp}` : "Not Describe"} />
+            <Info
+              value={data.cost_price ? `₹${data.cost_price}` : "Not Describe"}
+            />
+            <Info value={data.discount ? `${data.discount}` : "Not Describe"} />
+            <Info
+              value={
+                data.selling_price ? `₹${data.selling_price}` : "Not Describe"
+              }
+            />
+            <Info
+              value={
+                data.offer_percent ? `${data.offer_percent}%` : "Not Describe"
+              }
+            />
             <Info value={data.prescription_required ? "Yes" : "No"} />
-            <Info value={data.storage?data.storage:"Not Describe"} />
-            <Info value={data.country_of_origin?data.country_of_origin:"Not Describe"} />
-            <Info value={data.manufacture_address?data.manufacture_address:"Not Describe"} />
-            <Info value={data.best_price?`₹${data.best_price}`:"Not Describe"} />
-            <Info value={data.brought?data.brought:"Not Describe"} />
+            <Info value={data.storage ? data.storage : "Not Describe"} />
+            <Info
+              value={
+                data.country_of_origin ? data.country_of_origin : "Not Describe"
+              }
+            />
+            <Info
+              value={
+                data.manufacturer_address
+                  ? data.manufacturer_address
+                  : "Not Describe"
+              }
+            />
+            <Info
+              value={data.batchNumber ? data.batchNumber : "Not Describe"}
+            />
             <Info value={new Date(data.created_at).toLocaleString()} />
           </div>
         </div>
@@ -386,9 +766,9 @@ function MedicineViewModal({ data, onClose }) {
 
 function Info({ label, value }) {
   return (
-    <div className="rounded-md border border-white/10 bg-white/5 p-3">
-      {label && <p className="text-sm font-semibold text-gray-300">{label}</p>}
-      {value && <p className="text-sm text-gray-100">{value}</p>}
+    <div className="rounded-md border border-slate-900 bg-white/5 p-3">
+      {label && <p className="text-sm font-semibold text-[#f72585]">{label}</p>}
+      {value && <p className="text-sm text-slate-900">{value}</p>}
     </div>
   );
 }
@@ -402,7 +782,7 @@ function CopyAdminMedicinesModal({ onClose, onCopy }) {
   const [selectedMedicines, setSelectedMedicines] = useState(new Set());
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const api = "http://localhost:5000";
   useEffect(() => {
     const fetchAdminMedicines = async () => {
       try {
@@ -414,8 +794,8 @@ function CopyAdminMedicinesModal({ onClose, onCopy }) {
         );
         setAdminMedicines(res.data.data || []);
       } catch (err) {
-        console.error(err);
-        alert("Failed to load admin medicines");
+        console.error("Error loading admin medicines:", err);
+        alert("Failed to load admin medicines: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -438,7 +818,7 @@ function CopyAdminMedicinesModal({ onClose, onCopy }) {
     if (selectedMedicines.size === filtered.length) {
       setSelectedMedicines(new Set());
     } else {
-      setSelectedMedicines(new Set(filtered.map((m) => m.id)));
+      setSelectedMedicines(new Set(filtered.map((m) => m.medicine_id)));
     }
   };
 
@@ -446,7 +826,7 @@ function CopyAdminMedicinesModal({ onClose, onCopy }) {
     if (!searchQuery.trim()) return adminMedicines;
     const q = searchQuery.toLowerCase();
     return adminMedicines.filter((m) =>
-      [m.name, m.salt_composition, m.manufacturers, m.packaging]
+      [m.name, m.salt_composition, m.manufacturer]
         .filter(Boolean)
         .some((v) => v.toLowerCase().includes(q)),
     );
@@ -458,6 +838,7 @@ function CopyAdminMedicinesModal({ onClose, onCopy }) {
       return;
     }
 
+    console.log("Selected medicines from modal:", Array.from(selectedMedicines));
     await onCopy(Array.from(selectedMedicines));
     onClose();
   };
@@ -466,20 +847,25 @@ function CopyAdminMedicinesModal({ onClose, onCopy }) {
     <div className="fixed inset-0 z-[1000] grid place-items-center bg-black/50 p-4 overflow-auto">
       <div
         ref={boxRef}
-        className="w-full max-w-4xl rounded-2xl border border-white/10 bg-gray-900 p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-4xl rounded-2xl border border-slate-900 bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto text-slate-900"
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-xl font-semibold">Copy Admin Medicines</h3>
-          <button onClick={onClose} className="rounded-md p-1 hover:bg-white/5">
+          <h3 className="text-xl font-semibold text-[#56cfe1]">
+            Select Medicines From Master Database
+          </h3>
+          <button
+            onClick={onClose}
+            className="rounded-md p-1 border border-red-600 text-red-600 hover:bg-red-500 hover:text-white cursor-pointer"
+          >
             <X size={18} />
           </button>
         </div>
 
         {/* Search */}
         <div className="mb-4">
-          <div className="relative">
+          <div className="relative border border-slate-900 rounded-lg">
             <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              className="absolute  left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
               size={18}
             />
             <input
@@ -487,7 +873,7 @@ function CopyAdminMedicinesModal({ onClose, onCopy }) {
               placeholder="Search medicines..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-white/10 bg-white/5 text-slate-900 placeholder-gray-400 focus:outline-none focus:border-emerald-500"
             />
           </div>
         </div>
@@ -495,13 +881,13 @@ function CopyAdminMedicinesModal({ onClose, onCopy }) {
         {/* Medicines List */}
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <label className="text-sm font-semibold">
+            <label className="text-lg  text-[#f72585] ">
               Admin Medicines ({filteredMedicines.length})
             </label>
             {filteredMedicines.length > 0 && (
               <button
                 onClick={toggleAll}
-                className="text-sm text-emerald-400 hover:text-emerald-300"
+                className="text-sm border py-1 px-2 rounded-2xl border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white cursor-pointer"
               >
                 {selectedMedicines.size === filteredMedicines.length
                   ? "Deselect All"
@@ -517,25 +903,24 @@ function CopyAdminMedicinesModal({ onClose, onCopy }) {
           ) : (
             <div className="max-h-96 overflow-y-auto space-y-2">
               {filteredMedicines.map((med) => {
-                const isSelected = selectedMedicines.has(med.db_medicine_id);
+                const isSelected = selectedMedicines.has(med.medicine_id);
                 return (
                   <div
-                    key={med.db_medicine_id}
-                    onClick={() => toggleMedicine(med.db_medicine_id)}
-                    className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                      isSelected
-                        ? "border-emerald-500 bg-emerald-500/10"
-                        : "border-white/10 bg-white/5 hover:border-white/20"
-                    }`}
+                    key={med.medicine_id}
+                    onClick={() => toggleMedicine(med.medicine_id)}
+                    className={`p-3 rounded-lg border cursor-pointer transition-all ${isSelected
+                      ? "border-emerald-500 bg-emerald-500/10"
+                      : "border-white/10 bg-white/5 hover:border-white/20"
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       {isSelected ? (
                         <CheckSquare
                           size={20}
-                          className="mt-0.5 text-emerald-400"
+                          className="mt-0.5 text-emerald-600"
                         />
                       ) : (
-                        <Square size={20} className="mt-0.5 text-gray-400" />
+                        <Square size={20} className="mt-0.5 text-gray-600" />
                       )}
                       <div className="flex-1">
                         <p className="font-semibold">{med.name}</p>
@@ -557,14 +942,14 @@ function CopyAdminMedicinesModal({ onClose, onCopy }) {
         <div className="flex justify-end gap-2 pt-4 mt-4 border-t border-white/10">
           <button
             onClick={onClose}
-            className="rounded-md px-4 py-2 text-sm hover:bg-white/5"
+            className="rounded-md px-4 py-2 text-sm border border-red-600 text-red-600 hover:bg-red-500 hover:text-white cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleCopy}
             disabled={selectedMedicines.size === 0}
-            className="rounded-md bg-emerald-600 px-4 py-2 text-sm hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md border border-emerald-600 text-emerald-600 hover:bg-emerald-500 hover:text-white px-4 py-2 text-sm cursor-pointer"
           >
             Copy Selected ({selectedMedicines.size})
           </button>
@@ -585,16 +970,15 @@ function CopyBucketModal({ onClose, onCopy }) {
   const [selectedMedicines, setSelectedMedicines] = useState(new Set());
   const [loading, setLoading] = useState(false);
   const [loadingMedicines, setLoadingMedicines] = useState(false);
-
+  const api = "http://localhost:5000";
   useEffect(() => {
     const fetchBuckets = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        const res = await axios.get(
-          "http://localhost:5000/medicine/vendor/buckets",
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
+        const res = await axios.get(`${api}/medicine/vendor/buckets`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setBuckets(res.data.data || []);
       } catch (err) {
         console.error(err);
@@ -613,10 +997,9 @@ function CopyBucketModal({ onClose, onCopy }) {
     try {
       setLoadingMedicines(true);
       const token = localStorage.getItem("token");
-      const res = await axios.get(
-        `http://localhost:5000/medicine/bucket/${bucketId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const res = await axios.get(`${api}/medicine/bucket/${bucketId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setBucketMedicines(res.data.data || []);
     } catch (err) {
       console.error(err);
@@ -686,11 +1069,10 @@ function CopyBucketModal({ onClose, onCopy }) {
                 <button
                   key={bucket.id}
                   onClick={() => handleBucketSelect(bucket.id)}
-                  className={`p-3 rounded-lg border-2 transition-all ${
-                    selectedBucket === bucket.id
-                      ? "border-emerald-500 bg-emerald-500/10"
-                      : "border-white/10 bg-white/5 hover:border-white/20"
-                  }`}
+                  className={`p-3 rounded-lg border-2 transition-all ${selectedBucket === bucket.id
+                    ? "border-emerald-500 bg-emerald-500/10"
+                    : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
                 >
                   <p className="font-semibold">{bucket.name}</p>
                   <p className="text-xs text-gray-400">
@@ -733,11 +1115,10 @@ function CopyBucketModal({ onClose, onCopy }) {
                     <div
                       key={med.id}
                       onClick={() => toggleMedicine(med.id)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                        isSelected
-                          ? "border-emerald-500 bg-emerald-500/10"
-                          : "border-white/10 bg-white/5 hover:border-white/20"
-                      }`}
+                      className={`p-3 rounded-lg border cursor-pointer transition-all ${isSelected
+                        ? "border-emerald-500 bg-emerald-500/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                        }`}
                     >
                       <div className="flex items-start gap-3">
                         {isSelected ? (
@@ -790,35 +1171,38 @@ function CopyBucketModal({ onClose, onCopy }) {
 export default function MedicineDetails() {
   const { id } = useParams(); // bucket id
   // const navigate = useNavigate();
-
+  const addMedicineCalled = useRef(false);
   const [medicines, setMedicines] = useState([]);
   const [query, setQuery] = useState("");
   const [toast, setToast] = useState("");
   const [openAdd, setOpenAdd] = useState(false);
   const [editRow, setEditRow] = useState(null);
+  const [priceEditRow, setPriceEditRow] = useState(null);
   const [delRow, setDelRow] = useState(null);
   const [openAddMedicine, setOpenAddMedicine] = useState(false);
   const [dbMedicines, setDbMedicines] = useState([]);
   const [loadingDB, setLoadingDB] = useState(false);
   const [openCopyBucket, setOpenCopyBucket] = useState(false);
   const [openCopyAdmin, setOpenCopyAdmin] = useState(false);
-
+  const api = "http://localhost:5000";
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 1500);
   };
 
+
   /*------FETCH MEDICINE DETAIL WITH ID------*/
   const [viewRow, setViewRow] = useState(false);
-  const[viewdata,setViewdata]=useState([])
+  const [viewdata, setViewdata] = useState([]);
   const [loadingView, setLoadingView] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const openViewModal = async (medicineId) => {
     try {
       setLoadingView(true);
       const token = localStorage.getItem("token");
-
-      const url =`http://localhost:5000/medicine/vendor/medicine/${medicineId}`;
+      console.log(medicineId);
+      const url = `${api}/medicine/vendor/medicine/${medicineId}`;
 
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -834,6 +1218,16 @@ export default function MedicineDetails() {
       setLoadingView(false);
     }
   };
+  /*Searching*/
+  const filteredMedicines = useMemo(() => {
+    if (!searchQuery.trim()) return medicines;
+    const q = searchQuery.toLowerCase();
+    return medicines.filter((m) =>
+      [m.name, m.salt_composition, m.manufacture, m.batch_id]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(q)),
+    );
+  }, [medicines, searchQuery]);
 
   /*---Adding Medicine to Bucket---*/
 
@@ -852,7 +1246,7 @@ export default function MedicineDetails() {
         await axios.post(
           "http://localhost:5000/medicine/vendor/bucket/add-medicine",
           {
-            medicine_id: med.id,
+            medicine_id: med.medicne_id,
             medicine_source: med.medicine_source,
             bucket_id: id,
           },
@@ -864,14 +1258,6 @@ export default function MedicineDetails() {
 
       showToast("Medicine added to bucket");
       setOpenAddMedicine(false);
-
-      // reload bucket medicines
-      // const reload = await axios.get(
-      //   `http://localhost:5000/medicine/vendor/bucket/${id}/medicines`,
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
-
-      // setMedicines(reload.data);
       load();
     } catch (err) {
       console.error(err);
@@ -897,6 +1283,7 @@ export default function MedicineDetails() {
 
       showToast("Medicine Added Successfully");
       setOpenAdd(false);
+      load();
     } catch (err) {
       console.log(err.response?.data || err);
       alert("Failed to add medicine");
@@ -910,22 +1297,21 @@ export default function MedicineDetails() {
 
       // Copy all medicines from bucket (backend will handle filtering)
       const res = await axios.post(
-        `http://localhost:5000/medicine/vendor/bucket/${bucketId}/copy-medicines`,
+        `${api}/medicine/vendor/bucket/${bucketId}/copy-medicines`,
         { selected_medicine_ids: selectedMedicineIds },
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-
       showToast(
         res.data.message ||
-          `Successfully copied ${selectedMedicineIds.length} medicines`,
+        `Successfully copied ${selectedMedicineIds.length} medicines`,
       );
 
       // Reload medicines if we're on a bucket page
       if (id) {
         const reload = await axios.get(
-          `http://localhost:5000/medicine/vendor/bucket/${id}/medicines`,
+          `${api}/medicine/vendor/bucket/${id}/medicines`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         setMedicines(reload.data);
@@ -933,7 +1319,7 @@ export default function MedicineDetails() {
 
       // Also reload vendor medicines to show the copied ones
       const vendorMedicinesRes = await axios.get(
-        `http://localhost:5000/medicine/vendor/medicine`,
+        `${api}/medicine/vendor/medicine`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       // You can use this data to show in a separate view if needed
@@ -946,19 +1332,21 @@ export default function MedicineDetails() {
   /*-----Copy Admin Medicines to Vendor Table ----- */
   const handleCopyAdminMedicines = async (selectedMedicineIds) => {
     try {
+      console.log("Copying medicines:", selectedMedicineIds);
       const token = localStorage.getItem("token");
 
       const res = await axios.post(
-        `http://localhost:5000/medicine/copy-master-medicines`,
+        `${api}/medicine/copy-master-medicines`,
         { selected_medicine_ids: selectedMedicineIds, bucket_id: id },
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
 
+      console.log("Copy response:", res.data);
       showToast(
         res.data.message ||
-          `Successfully copied ${selectedMedicineIds.length} medicines`,
+        `Successfully copied ${selectedMedicineIds.length} medicines`,
       );
       load();
       // Reload medicines if we're on a bucket page
@@ -971,34 +1359,86 @@ export default function MedicineDetails() {
       // }
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to copy admin medicines");
+      alert("Failed to fetch medicine details for editing");
+    }
+  };
+
+  /*-----Edit Medicine---- */
+  const handleEdit = async (m) => {
+    try {
+      const token = localStorage.getItem("token");
+      const url = `${api}/medicine/vendor/medicine/${m.vendor_medicine_id}`;
+
+      const res = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = res.data.data;
+      setEditRow({
+        id: data.vendor_medicine_id,
+        name: data.name, // For display
+        salt_composition: data.salt_composition, // For display
+
+        // Price fields
+        mrp: data.mrp,
+        cost_price: data.cost_price,
+        selling_price: data.selling_price,
+        discount: data.discount,
+        offer_percent: data.offer_percent,
+
+        // Stock fields
+        quantity: data.quantity,
+        expiry_date: data.expiry_date,
+        manufacturer_date: data.manufacturer_date,
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fetch medicine details for editing");
     }
   };
 
   /*-----Update Medicine ----- */
-  const handleUpdateMedicine = async (fd, medicineId) => {
+  const handlePriceEdit = async (medicine) => {
     try {
       const token = localStorage.getItem("token");
-
-      await axios.put(
-        `http://localhost:5000/medicine/vendor/medicine/${medicineId}`,
-        fd,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      showToast("Medicine Updated Successfully");
-      setEditRow(null);
-
-      // Reload medicines
-      const reload = await axios.get(
-        `http://localhost:5000/medicine/vendor/bucket/${id}/medicines`,
+      // Fetch fresh data for this medicine
+      const res = await axios.get(
+        `${api}/medicine/vendor/medicine/${medicine.vendor_medicine_id}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      setMedicines(reload.data);
+      // Open modal with fresh data
+      setPriceEditRow(res.data.data);
+    } catch (err) {
+      console.error("Fetch medicine error:", err);
+      alert("Failed to load latest medicine details");
+    }
+  };
+
+  const handleCreateBatch = async (data) => {
+    const medicine_id = data.medicine_id || priceEditRow?.medicine_id;
+    if (!medicine_id) {
+      alert("Master medicine_id is missing — cannot create batch");
+      return;
+    }
+    if (!data.mrp || !data.expiry_date) {
+      alert("MRP and Expiry Date are required to create a batch");
+      return;
+    }
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${api}/medicine/batch`,
+        {
+          medicine_id,
+          mrp: data.mrp,
+          expiry_date: data.expiry_date,
+          manufacturer_date: data.manufacturer_date || null,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      showToast(`Batch created: ${res.data?.data?.batch_id}`);
+      setPriceEditRow(null);
+      load();
     } catch (err) {
       console.error(err.response?.data || err);
       alert(err.response?.data?.message || "Failed to update medicine");
@@ -1007,14 +1447,39 @@ export default function MedicineDetails() {
 
   
   /* ------------ Fetch Medicines ------------- */
+  // useEffect(() => {
+  //   load();
+
+  //   if (id) load();
+  // }, [id]);
+  // async function load() {
+  //   try {
+  //     const token = localStorage.getItem("token");
+
+  //     const res = await axios.get(
+  //       `${api}/medicine/vendor/medicine/bucket/${id}`,
+  //       { headers: { Authorization: `Bearer ${token}` } },
+  //     );
+
+  //     setMedicines(res.data.data);
+  //     showToast("Medicines Loaded");
+  //   } catch (err) {
+  //     console.log(err);
+  //     showToast("Failed to Load");
+  //   }
+  // }
+
   useEffect(() => {
+
+    if (!id) return;
+
     load();
 
-    if (id) load();
   }, [id]);
-   async function load() {
-      try {
-        const token = localStorage.getItem("token");
+
+  async function load() {
+    try {
+      const token = localStorage.getItem("token");
 
         const res = await axios.get(
           `http://localhost:5000/medicine/vendor/medicine/bucket/${id}`,
@@ -1044,19 +1509,18 @@ export default function MedicineDetails() {
   const handleDelete = async (m) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(
-        `http://localhost:5000/medicine/vendor/medicine/${m}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+      await axios.delete(`${api}/medicine/vendor/medicine/${m}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMedicines((prev) =>
+        prev.filter((item) => item.vendor_medicine_id !== m),
       );
-      setMedicines((prev) => prev.filter((item) => item.id !== m.id));
-
+      alert("Medicine Deleted successfully");
       showToast("Medicine removed from bucket");
       load();
     } catch (err) {
       console.error(err.response?.data || err);
-      alert("Failed to remove medicine from bucket");
+      alert(err.response?.data?.message || "Failed to remove medicine from bucket");
     }
   };
 
@@ -1067,6 +1531,16 @@ export default function MedicineDetails() {
         <h1 className="text-2xl font-semibold">Bucket Medicines</h1>
 
         <div className="flex items-center gap-2">
+          {/* Search */}
+          <div className="flex items-center   mt-4 mb-4 w-125">
+            <Search size={20} />
+            <input
+              placeholder="Search medicines..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-md bg-white/5 border border-violet-500 text-black px-3 py-1 items-center"
+            />
+          </div>
           {/* Copy Admin Medicines to Vendor Table */}
           <button
             onClick={() => setOpenCopyAdmin(true)}
@@ -1075,18 +1549,9 @@ export default function MedicineDetails() {
             <Plus size={16} /> Add Medicines
           </button>
 
-          {/* Copy Bucket Medicines to Vendor Table */}
-          <button
-            onClick={() => setOpenCopyBucket(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm hover:bg-blue-500"
-          >
-            <Plus size={16} /> Copy Bucket Medicines
-          </button>
-
-          {/* Create New Medicine */}
           <button
             onClick={() => setOpenAdd(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-2 text-sm hover:bg-emerald-500"
+            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-2 text-sm hover:bg-emerald-500 cursor-pointer"
           >
             <Plus size={16} /> Create New Medicine
           </button>
@@ -1099,28 +1564,31 @@ export default function MedicineDetails() {
           {toast}
         </div>
       )}
-    {loadingView && (
-      <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
-        Loading...
-      </div>
-    )}
+      {loadingView && (
+        <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+          Loading...
+        </div>
+      )}
       {/* Table */}
-      <div className=" rounded-xl border border-white/10 bg-white/5">
+      <div className="  border border-slate-900 bg-white">
         <table className="min-w-full text-sm">
           {/* HEADER */}
-          <thead className="bg-white/5">
+          <thead className="bg-violet-500">
             <tr>
               <th className="px-3 py-2">S.No</th>
-                <th className="px-3 py-2">Owner</th>
+              <th className="px-3 py-2">Batch Id</th>
+              <th className="px-3 py-2">Medicine Id</th>
+
+              <th className="px-3 py-2">Owner</th>
 
               <th className="px-3 py-2">Medicine Name</th>
-              
+
               <th className="px-3 py-2">Salt</th>
               <th className="px-3 py-2">Manufacturer</th>
               <th className="px-3 py-2">MRP</th>
               <th className="px-3 py-2">Selling Price</th>
               <th className="px-3 py-2">Discount</th>
-              <th className="px-3 py-2">Stock</th>
+              <th className="px-3 py-2">Quantity</th>
               <th className="px-3 py-2">Action</th>
             </tr>
           </thead>
@@ -1142,22 +1610,22 @@ export default function MedicineDetails() {
                 {/* ACTION BUTTONS */}
                 <td className="px-2 py-2 flex gap-2">
                   <button
-                    onClick={() => openViewModal(m.id)}
-                      className="rounded-md border border-white/10 px-2 py-1 hover:bg-white/5"
+                    onClick={() => openViewModal(m.vendor_medicine_id)}
+                    className="rounded-md border border-white/10 px-2 py-1 hover:bg-white/5 cursor-pointer"
                   >
                     <Eye size={18} />
                   </button>
 
                   <button
-                    onClick={() => handleEdit(m)}
-                      className="rounded-md border border-white/10 px-2 py-1 hover:bg-white/5"
+                    onClick={() => handlePriceEdit(m)}
+                    className="rounded-md border border-white/10 px-2 py-1 hover:bg-white/5 cursor-pointer"
                   >
                     <Pencil size={18} />
                   </button>
 
                   <button
-                    onClick={() => handleDelete(m.id)}
-                      className="rounded-md border border-white/10 px-2 py-1 hover:bg-white/5"
+                    onClick={() => handleDelete(m.vendor_medicine_id)}
+                    className="rounded-md border border-white/10 px-2 py-1 hover:bg-white/5 cursor-pointer"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -1186,7 +1654,7 @@ export default function MedicineDetails() {
       )}
 
       {editRow && (
-        <MedicineModal
+        <PriceEditModal
           mode="edit"
           initial={editRow}
           onClose={() => setEditRow(null)}
@@ -1214,7 +1682,16 @@ export default function MedicineDetails() {
       {viewRow && (
         <MedicineViewModal data={viewdata} onClose={() => setViewRow(false)} />
       )}
-
+      {priceEditRow && (
+        <PriceEditModal
+          initial={priceEditRow}
+          onClose={() => setPriceEditRow(null)}
+          onSubmit={(data) =>
+            handleUpdatePrice(data, priceEditRow.vendor_medicine_id)
+          }
+          onCreateBatch={handleCreateBatch}
+        />
+      )}
       {/* Copy Bucket Modal */}
       {openCopyBucket && (
         <CopyBucketModal
@@ -1230,6 +1707,9 @@ export default function MedicineDetails() {
           onCopy={handleCopyAdminMedicines}
         />
       )}
+
+
+
     </div>
   );
 }

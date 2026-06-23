@@ -16,12 +16,12 @@ function VendorSign() {
     const [showOTP, setShowOTP] = useState(false);
     const [mobileNo, setMobileNo] = useState("");
     const [otp, setOtp] = useState("");
-
+    const api="http://localhost:5000";
     const navigate = useNavigate();
     const sendOTP = async (data) => {
         try {
             const res = await axios.post(
-                "http://localhost:5000/vendor/sign",
+                `${api}/vendor/sign`,
                 data
             );
 

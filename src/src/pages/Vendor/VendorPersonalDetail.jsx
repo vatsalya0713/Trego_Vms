@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios'
 function VendorPersonalDetail() {
   const navigate=useNavigate();
+  const api="http://localhost:5000";
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -43,7 +44,7 @@ function VendorPersonalDetail() {
     formData.append("pan_card", data.pan_card[0]);
 
     await axios.post(
-      "http://localhost:5000/vendor/vendor/personal-detail",
+      `${api}/vendor/vendor/personal-detail`,
       formData,
       {
         headers: {
@@ -89,12 +90,12 @@ function VendorPersonalDetail() {
 
         {/* Gender Dropdown */}
         <select
-          className="w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2"
+          className="w-full rounded-md border border-slate-900 bg-white/5 px-3 py-2 text-slate-900"
           {...register("gender", { required: "Select your gender" })}>
-          <option value="">-- Select Gender --</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
+          <option value="" className="bg-white text-slate-900">-- Select Gender --</option>
+          <option value="Male" className="bg-white text-slate-900">Male</option>
+          <option value="Female" className="bg-white text-slate-900">Female</option>
+          <option value="Other" className="bg-white text-slate-900">Other</option>
         </select>
         {errors.gender && <p className="text-red-400 text-sm">{errors.gender.message}</p>}
 
@@ -117,20 +118,20 @@ function VendorPersonalDetail() {
         {/* Address */}
         <textarea
           placeholder="Full Address"
-          className="w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2"
+          className="w-full rounded-md border border-slate-900 bg-white/5 px-3 py-2 text-slate-900 outline-none focus:ring-[#56cfe1]"
           rows="3"
           {...register("address", { required: "Address is required" })}
         ></textarea>
         {errors.address && <p className="text-red-400 text-sm">{errors.address.message}</p>}
           {/* Profile Picture */}
-<label className="m-2">Profile Picture</label>
+<label className="m-2 text-xs font-semibold uppercase tracking-wide text-[#f72585]">Profile Picture</label>
 <input
   type="file"
   accept="image/*"
   {...register("profile_image", {
     required: "Profile picture is required"
   })}
-  className="w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2"
+  className="w-full rounded-md border border-slate-900 bg-white/5 px-3 py-2 text-slate-600"
 />
 {errors.profile_image && (
   <p className="text-red-400 text-sm">
@@ -138,26 +139,26 @@ function VendorPersonalDetail() {
   </p>
 )}
           {/* Aadhaar Card */}
-  <label htmlFor="aadhar_card" className="m-2">Aadhar Card</label>
+  <label htmlFor="aadhar_card" className="m-2 text-xs font-semibold uppercase tracking-wide text-[#f72585]">Aadhar Card</label>
 <input
 placeholder="Aadhar Card"
   type="file"
   accept="image/*,.pdf"
   {...register("aadhaar_card", { required: "Aadhaar Card is required" })}
-  className="w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2"
+  className="w-full rounded-md border border-slate-900 bg-white/5 px-3 py-2 text-slate-600"
 />
 {errors.aadhaar_card && (
   <p className="text-red-400 text-sm">{errors.aadhaar_card.message}</p>
 )}
 
 {/* PAN Card */}
-  <label htmlFor="pan_card" className="m-2">PAN Card</label>
+  <label htmlFor="pan_card" className="m-2 text-xs font-semibold uppercase tracking-wide text-[#f72585]">PAN Card</label>
 <input
 placeholder="Upload PAN Card"
   type="file"
   accept="image/*,.pdf"
   {...register("pan_card", { required: "PAN Card is required" })}
-  className="w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2"
+  className="w-full rounded-md border border-slate-900 bg-white/5 px-3 py-2 text-slate-600"
 />
 {errors.pan_card && (
   <p className="text-red-400 text-sm">{errors.pan_card.message}</p>
@@ -174,9 +175,9 @@ placeholder="Upload PAN Card"
 
 function AuthShell({ title, hint, children }) {
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-gray-800 bg-gray-900 p-6 mt-12">
-      <h1 className="text-2xl font-semibold">{title}</h1>
-      {hint && <p className="mt-1 text-sm text-gray-400">{hint}</p>}
+    <div className="mx-auto max-w-md rounded-2xl border border-slate-900 bg-white/5 p-6 mt-12 shadow-lg shadow-violet-200">
+      <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+      {hint && <p className="mt-1 text-sm text-slate-600">{hint}</p>}
       <div className="mt-5">{children}</div>
     </div>
   );
@@ -190,7 +191,7 @@ const Input = React.forwardRef(({ onChange, onBlur, name, placeholder, type = "t
     onChange={onChange}
     placeholder={placeholder}
     type={type}
-    className={`w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2 ${className}`}
+    className={`w-full rounded-md border border-slate-900 bg-white/5 px-3 py-2 text-slate-900 placeholder-slate-400 outline-none focus:ring-[#56cfe1] ${className}`}
   />
 ));
 
